@@ -26,12 +26,15 @@ export type ExtrudedMeshGeneratorOptions = {
   maxy: number
   sizex: number
   sizey: number
+  widthSegments: number
 }
 
 export class MeshPrototypeGenerator {
   private static readonly SIDE_SEGMENTS = 3
 
   public prototypes: BufferChunk[] = []
+
+  public constructor(private readonly options: ExtrudedMeshGeneratorOptions) {}
 
   public createFromCurves(curves: FiberCurve[]) {
     this.prototypes = curves.map((curve) => this.addCurve(curve))
@@ -44,9 +47,9 @@ export class MeshPrototypeGenerator {
     const normals: BufferChunk['normals'] = []
     const indices: BufferChunk['indices'] = []
     const offsets: BufferChunk['offsets'] = []
-    const sideSegments = MeshPrototypeGenerator.SIDE_SEGMENTS
+    const { widthSegments } = this.options
 
-    const angleStep = (2 * Math.PI) / sideSegments
+    const angleStep = (2 * Math.PI) / widthSegments
     const LENGTH_SEGMENTS = path.length
 
     const pathBase = path[0].position
@@ -88,7 +91,7 @@ export class MeshPrototypeGenerator {
       let v1 = new Vector3().crossVectors(dir, new Vector3(1, 0, 0)).normalize()
       let v2 = new Vector3().crossVectors(dir, v1).normalize()
 
-      for (let i = 0; i < sideSegments + 1; ++i) {
+      for (let i = 0; i < widthSegments + 1; ++i) {
         let normal = new Vector3().addVectors(
           v1.clone().multiplyScalar(Math.cos(angleStep * i)),
           v2.clone().multiplyScalar(Math.sin(angleStep * i))
@@ -97,7 +100,7 @@ export class MeshPrototypeGenerator {
         let vert = normal.clone().multiplyScalar(radius).add(point)
         vertices.push([vert.x, vert.y, vert.z])
 
-        const u = map(i / sideSegments, 0, 1, 0.01, 0.99)
+        const u = map(i / widthSegments, 0, 1, 0.01, 0.99)
         const v = map(j / (LENGTH_SEGMENTS - 1), 0, 1, 0.01, 0.99)
         uvs.push([u, v])
 
@@ -109,8 +112,8 @@ export class MeshPrototypeGenerator {
     }
 
     for (let j = 0; j < LENGTH_SEGMENTS - 1; ++j) {
-      for (let i = 0; i < sideSegments; ++i) {
-        indices.push(this.getIndiciForLayer(i, j, sideSegments + 1))
+      for (let i = 0; i < widthSegments; ++i) {
+        indices.push(this.getIndiciForLayer(i, j, widthSegments + 1))
       }
     }
 
@@ -152,20 +155,10 @@ export class MeshPrototypeGenerator {
 
 export class ExtrudedMeshGenerator {
   public bufferGeometry?: BufferGeometry
-  private readonly options: ExtrudedMeshGeneratorOptions
   private readonly meshPrototypeGenerator: MeshPrototypeGenerator
-  private static readonly defaults: ExtrudedMeshGeneratorOptions = {
-    minx: -0.5,
-    miny: -0.5,
-    maxx: 0.5,
-    maxy: 0.5,
-    sizex: 0.02,
-    sizey: 0.02,
-  } // rect + density
 
-  public constructor(options?: Partial<ExtrudedMeshGeneratorOptions>) {
-    this.options = { ...ExtrudedMeshGenerator.defaults, ...options }
-    this.meshPrototypeGenerator = new MeshPrototypeGenerator()
+  public constructor(private readonly options: ExtrudedMeshGeneratorOptions) {
+    this.meshPrototypeGenerator = new MeshPrototypeGenerator(options)
   }
 
   public setCurves(curves: FiberCurve[]) {
