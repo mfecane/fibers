@@ -54,9 +54,9 @@ export class Renderer {
         this.perspCamera,
         this.renderer.domElement
       )
-      this.controls.minDistance = 2
-      this.controls.maxDistance = 12
-      // this.controls.maxPolarAngle = (7 * Math.PI) / 16
+      this.controls.minDistance = 10
+      this.controls.maxDistance = 50
+      this.controls.maxPolarAngle = (7.5 * Math.PI) / 16
       this.controls.target.set(0, 0, 0)
       this.controls.enableDamping = true
       this.controls.zoomSpeed = 0.5

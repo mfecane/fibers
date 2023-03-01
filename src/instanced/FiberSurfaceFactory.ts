@@ -25,8 +25,10 @@ export class FiberSurfaceFactory {
     cellSize: 0.08,
 
     curvature: 2.0,
+
     baseLength: 0.3,
-    lengthVariance: 0.8,
+    lengthVariance: 0.0,
+
     heightSegments: 3.0,
     widthSegments: 3.0,
     width: 0.01,
@@ -64,6 +66,7 @@ precision mediump float;
 precision mediump int;
 
 uniform sampler2D surfaceColor;
+uniform float spiralRatio;
 
 varying vec2 vUv;
 varying vec2 vUv2;
@@ -76,19 +79,14 @@ void main()	{
 
     #if defined(USE_SPIRAL_TEXTURE)
 
-      // pseudorandomly shift uv using color
-      // scaled with different factor u and v
-      // adjusted to range -0.5, 0.5
-      vec2 scaledUv = fract(vUv * vec2(2.0, 6.0));
-      float spiral = sin((scaledUv.x + scaledUv.y) * TAU);
-      spiral = smoothstep(1.0, 0.5, spiral);
-      texelColor *= (0.6 + 0.4 * spiral);
+      vec2 scaledUv = fract(vUv * vec2(3.0, 3.0 * spiralRatio));
+      float spiral = cos((scaledUv.x + scaledUv.y) * TAU) / 2.0 + 0.5;
+      texelColor *= (0.8 + 0.2 * spiral) * (0.8 + 0.2 * smoothstep(0.0, 0.01, spiral));
 
     #endif
 
     texelColor *= (0.2 + vOffset * 0.8);
-    gl_FragColor = vec4(texelColor.xyz* 1.5 , 1.0);
-    // TODO omit something
+    gl_FragColor = vec4(texelColor.xyz * 1.5 , 1.0);
 }
 `
 
@@ -120,6 +118,9 @@ void main()	{
       defines,
       uniforms: {
         surfaceColor: { value: surfaceColorMap },
+        spiralRatio: {
+          value: this.options.baseLength / this.options.fiberWidth / 4.0,
+        },
       },
       vertexShader: FiberSurfaceFactory.vertexShader,
       fragmentShader: FiberSurfaceFactory.fragmentShader,

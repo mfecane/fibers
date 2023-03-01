@@ -28,16 +28,34 @@ const preset2 = {
   surfaceColorMap: './texture_light.png',
   spiralTexture: true,
 
-  curvature: 2.0,
+  curvature: 3.0,
   baseLength: 2.0,
+  lengthVariance: 0.1,
   fiberWidth: 0.1,
 
   heightSegments: 8.0,
   widthSegments: 3.0,
 
   shapeType: ShapeType.Round,
-  radius: 0.5,
-  cellSize: 0.2,
+  radius: 10,
+  cellSize: 0.12,
+}
+
+const preset3 = {
+  surfaceColorMap: './texture_light.png',
+  spiralTexture: true,
+
+  curvature: 3.0,
+  baseLength: 2.2,
+  lengthVariance: 0.1,
+  fiberWidth: 0.12,
+
+  heightSegments: 4.0,
+  widthSegments: 3.0,
+
+  shapeType: ShapeType.Round,
+  radius: 10,
+  cellSize: 0.12,
 }
 
 export const exec = () => {
@@ -57,6 +75,6 @@ export const exec = () => {
 }
 
 function createObjects(): void {
-  const carpetFactory = new FiberSurfaceFactory(preset2)
+  const carpetFactory = new FiberSurfaceFactory(preset3)
   renderer.scene.add(carpetFactory.mesh!)
 }

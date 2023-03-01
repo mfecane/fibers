@@ -67,10 +67,15 @@ export class ExtrudedMeshGenerator {
   }
 
   private moveChunkToOrigin(chunk: BufferChunk, origin: Vector3): void {
+    const randomAngle = 2 * Math.PI * Math.random()
     chunk.vertices.forEach((vertex) => {
-      vertex[0] += origin.x
-      vertex[1] += origin.y
-      vertex[2] += origin.z
+      const x = vertex[0]
+      const z = vertex[2]
+      // prettier-ignore
+      {
+        vertex[0] = x * Math.sin(randomAngle) - z * Math.cos(randomAngle) + origin.x
+        vertex[2] = x * Math.cos(randomAngle) + z * Math.sin(randomAngle) + origin.z
+      }
     })
   }
 

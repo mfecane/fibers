@@ -3,9 +3,9 @@ import * as THREE from 'three'
 import {
   BufferChunk,
   ExtrudedMeshGeneratorOptions,
-  FiberCurve,
 } from './ExtrudedMeshGenerator'
 import { map } from 'src/lib/lib'
+import { FiberCurve } from './CurveGenerator'
 
 export class MeshPrototypeGenerator {
   public prototypes: BufferChunk[] = []
@@ -39,7 +39,7 @@ export class MeshPrototypeGenerator {
         path[j].position[1],
         path[j].position[2]
       )
-      let radius = path[j].width
+      let radius = path[j].width / 2
 
       if (j > 0) {
         let prev = new THREE.Vector3(
