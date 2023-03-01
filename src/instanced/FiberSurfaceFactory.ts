@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { Mesh } from 'three'
-import { CurveGenerator } from './CurveGenerator'
+import { CurveGenerator, CurveGeneratorOptions } from './CurveGenerator'
 import {
   ExtrudedMeshGenerator,
   ExtrudedMeshGeneratorOptions,
@@ -9,6 +9,7 @@ import {
 type CarpetFactoryOptions = {
   surfaceColorMap: string
   extrudedMeshGeneratorOptions: Partial<ExtrudedMeshGeneratorOptions>
+  curveGeneratorOptions: CurveGeneratorOptions
 }
 
 export class FiberSurfaceFactory {
@@ -24,6 +25,11 @@ export class FiberSurfaceFactory {
       maxy: 3,
       sizex: 0.02,
       sizey: 0.02,
+    },
+    curveGeneratorOptions: {
+      variance: 0.3,
+      length: 0.3,
+      segments: 10.0,
     },
   }
 
@@ -82,7 +88,9 @@ void main()	{
   }
 
   private createObjects(): void {
-    const curveGenerator = new CurveGenerator()
+    const curveGenerator = new CurveGenerator(
+      this.options.curveGeneratorOptions
+    )
     const curves = []
     for (let i = 0; i < 200; ++i) {
       curves.push(curveGenerator.generateCurve())
