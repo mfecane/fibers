@@ -28,6 +28,7 @@ export class FiberSurfaceFactory {
     sizex: 0.02,
     sizey: 0.02,
     shapeType: ShapeType.Round,
+    cellSize: 0.08,
 
     variance: 2.0,
     length: 0.3,

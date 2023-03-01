@@ -11,7 +11,7 @@ export type ShapeFactoryOptions = {
   sizey?: number
   radius?: number
   shapeType: ShapeType
-  cellSize?: number
+  cellSize: number
 }
 
 export class ShapeFactory {
@@ -51,12 +51,13 @@ export class ShapeFactory {
   private generateRoundShape(): MeshGeneratorShape {
     const { radius = 1, cellSize = 0.02 } = this.options
     const origins: THREE.Vector3[] = []
-
     // polar coordinates
-    for (let r = 0; r < radius; r += cellSize) {
-      for (let a = 0; a < r * Math.PI * 2; a += cellSize) {
+    for (let r = 0; r <= radius; r += cellSize) {
+      for (let a = 0; a <= Math.PI * 2 * r; a += cellSize) {
         origins.push(
-          this.randomShift(new Vector3(r * Math.cos(a), 0, r * Math.sin(a)))
+          this.randomShift(
+            new Vector3(r * Math.cos(a / r), 0, r * Math.sin(a / r))
+          )
         )
       }
     }
@@ -66,8 +67,8 @@ export class ShapeFactory {
 
   private randomShift(position: Vector3) {
     const { cellSize = 0.02 } = this.options
-    position.x += cellSize * 0.5 * Math.random()
-    position.z += cellSize * 0.5 * Math.random()
+    position.x += cellSize * 0.8 * Math.random()
+    position.z += cellSize * 0.8 * Math.random()
     return position
   }
 }

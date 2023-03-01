@@ -15,10 +15,24 @@ const preset1 = {
   sizey: 0.02,
   variance: 1.0,
   length: 0.08,
-  heightSegments: 6.0,
+  heightSegments: 4.0,
   widthSegments: 5.0,
-  width: 0.014,
+  width: 0.02,
   spiralTexture: false,
+  cellSize: 0.025,
+}
+
+const preset2 = {
+  surfaceColorMap: './texture_light.png',
+  variance: 2.0,
+  length: 0.6,
+  heightSegments: 8.0,
+  widthSegments: 3.0,
+  width: 0.02,
+  spiralTexture: true,
+
+  radius: 4.0,
+  cellSize: 0.04,
 }
 
 export const exec = () => {
@@ -38,6 +52,6 @@ export const exec = () => {
 }
 
 function createObjects(): void {
-  const carpetFactory = new FiberSurfaceFactory(preset1)
+  const carpetFactory = new FiberSurfaceFactory(preset2)
   renderer.scene.add(carpetFactory.mesh!)
 }
