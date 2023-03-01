@@ -6,7 +6,8 @@ import { FiberCurve } from './ExtrudedMeshGenerator'
 export type CurveGeneratorOptions = {
   variance: number
   length: number
-  segments: number
+  heightSegments: number
+  width: number
 }
 
 export class CurveGenerator {
@@ -16,13 +17,14 @@ export class CurveGenerator {
     const points: FiberCurve = []
     let dir = new Vector3(0, 1, 0)
     let point = new Vector3(0, 0, 0)
-    for (let i = 0; i < this.options.segments; ++i) {
-      points.push({
-        position: vector3ToTuple(point),
-        width: this.getWidth(i),
-      })
+    points.push({ position: vector3ToTuple(point), width: this.getWidth(0) })
+    for (let i = 1; i < this.options.heightSegments; ++i) {
       point.add(dir.clone().multiplyScalar(this.getStep(i)))
       this.changeDir(dir)
+      const width = i === this.options.heightSegments - 1 ? 0 : this.getWidth(i)
+      const position = vector3ToTuple(point)
+      position[1] = Math.max(position[1], width)
+      points.push({ position, width })
     }
     return points
   }
@@ -35,19 +37,18 @@ export class CurveGenerator {
   }
 
   private getWidth(index: number): number {
-    const cureveParameter = index / this.options.segments
-    const reduce = mapclamp(cureveParameter, 0.6, 1.0, 0, 0.008)
-    return 0.01 - reduce
+    const parameter = index / this.options.heightSegments
+    return mapclamp(parameter, 0.6, 1.0, this.options.width, 0.01)
   }
 
-  private getStep(idnex: number): number {
-    const { length, segments } = this.options
+  private getStep(index: number): number {
+    const { length, heightSegments } = this.options
     return mapclamp(
-      idnex,
+      index,
       0,
-      segments,
-      length / segments,
-      length / segments / 2
+      heightSegments,
+      length / heightSegments,
+      length / heightSegments / 2
     )
   }
 }

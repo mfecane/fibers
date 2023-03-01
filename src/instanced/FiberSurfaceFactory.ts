@@ -6,10 +6,11 @@ import {
   ExtrudedMeshGeneratorOptions,
 } from './ExtrudedMeshGenerator'
 
-type CarpetFactoryOptions = {
+export interface CarpetFactoryOptions
+  extends CurveGeneratorOptions,
+    ExtrudedMeshGeneratorOptions {
   surfaceColorMap: string
-  extrudedMeshGeneratorOptions: Partial<ExtrudedMeshGeneratorOptions>
-  curveGeneratorOptions: CurveGeneratorOptions
+  spiralTexture: boolean
 }
 
 export class FiberSurfaceFactory {
@@ -18,19 +19,20 @@ export class FiberSurfaceFactory {
 
   private static readonly defaults: CarpetFactoryOptions = {
     surfaceColorMap: '',
-    extrudedMeshGeneratorOptions: {
-      minx: -3,
-      miny: -3,
-      maxx: 3,
-      maxy: 3,
-      sizex: 0.02,
-      sizey: 0.02,
-    },
-    curveGeneratorOptions: {
-      variance: 0.3,
-      length: 0.3,
-      segments: 10.0,
-    },
+
+    minx: -1,
+    miny: -1,
+    maxx: 1,
+    maxy: 1,
+    sizex: 0.02,
+    sizey: 0.02,
+
+    variance: 2.0,
+    length: 0.3,
+    heightSegments: 3.0,
+    widthSegments: 3.0,
+    width: 0.01,
+    spiralTexture: true,
   }
 
   private static readonly vertexShader = `
@@ -70,42 +72,53 @@ varying float vOffset;
 
 void main()	{
     vec4 texelColor = texture2D(surfaceColor, vUv2);
-    // pseudorandomly shift uv using color
-    // scaled with different factor u and v
-    // adjusted to range -0.5, 0.5
-    vec2 scaledUv = fract((vUv + texelColor.xy * 100.0) * vec2(2.0, 6.0)) - vec2(0.5);
-    float spiral = abs(abs(scaledUv.x + scaledUv.y) - 0.5);
-    spiral = smoothstep(0.0, 0.5, spiral);
-    texelColor *= (0.2 + vOffset * 0.8) * (0.6 + 0.4 * spiral);
+
+    #if defined(USE_SPIRAL_TEXTURE)
+
+      // pseudorandomly shift uv using color
+      // scaled with different factor u and v
+      // adjusted to range -0.5, 0.5
+      vec2 scaledUv = fract((vUv + texelColor.xy * 100.0) * vec2(2.0, 6.0)) - vec2(0.5);
+      float spiral = abs(abs(scaledUv.x + scaledUv.y) - 0.5);
+      spiral = smoothstep(0.0, 0.5, spiral);
+
+      texelColor *= (0.6 + 0.4 * spiral);
+
+    #endif
+
+    texelColor *= (0.2 + vOffset * 0.8);
     gl_FragColor = vec4(texelColor.xyz* 1.5 , 1.0);
     // TODO omit something
 }
 `
 
   public constructor(options: Partial<CarpetFactoryOptions>) {
-    this.options = { ...FiberSurfaceFactory.defaults, ...options }
+    this.options = {
+      ...FiberSurfaceFactory.defaults,
+      ...options,
+    }
     this.createObjects()
   }
 
   private createObjects(): void {
-    const curveGenerator = new CurveGenerator(
-      this.options.curveGeneratorOptions
-    )
+    const curveGenerator = new CurveGenerator(this.options)
     const curves = []
     for (let i = 0; i < 200; ++i) {
       curves.push(curveGenerator.generateCurve())
     }
-    const extrudedMeshGenerator = new ExtrudedMeshGenerator(
-      this.options.extrudedMeshGeneratorOptions
-    )
+    const extrudedMeshGenerator = new ExtrudedMeshGenerator(this.options)
     extrudedMeshGenerator.setCurves(curves)
     extrudedMeshGenerator.populateShape()
     const bufferGeomertry = extrudedMeshGenerator.bufferGeometry
     const surfaceColorMap = new THREE.TextureLoader().load(
       this.options.surfaceColorMap
     )
-
+    const defines: any = {}
+    if (this.options.spiralTexture) {
+      defines.USE_SPIRAL_TEXTURE = true
+    }
     const material = new THREE.RawShaderMaterial({
+      defines,
       uniforms: {
         surfaceColor: { value: surfaceColorMap },
       },

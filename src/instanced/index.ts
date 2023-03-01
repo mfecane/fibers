@@ -5,6 +5,22 @@ import { FiberSurfaceFactory } from './FiberSurfaceFactory'
 
 let renderer: Renderer
 
+const preset1 = {
+  surfaceColorMap: './texture_light.png',
+  minx: -1,
+  miny: -1,
+  maxx: 1,
+  maxy: 1,
+  sizex: 0.02,
+  sizey: 0.02,
+  variance: 1.0,
+  length: 0.05,
+  heightSegments: 6.0,
+  widthSegments: 5.0,
+  width: 0.014,
+  spiralTexture: false,
+}
+
 export const exec = () => {
   const div = document.createElement('div')
   div.style.width = window.innerWidth + 'px'
@@ -22,8 +38,6 @@ export const exec = () => {
 }
 
 function createObjects(): void {
-  const carpetFactory = new FiberSurfaceFactory({
-    surfaceColorMap: './texture_light.png',
-  })
+  const carpetFactory = new FiberSurfaceFactory(preset1)
   renderer.scene.add(carpetFactory.mesh!)
 }
