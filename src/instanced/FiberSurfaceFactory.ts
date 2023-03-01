@@ -70,8 +70,17 @@ varying vec2 vUv;
 varying vec2 vUv2;
 varying float vOffset;
 
+float rand(vec2 co){
+  return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 void main()	{
-    vec4 texelColor = texture2D(surfaceColor, vUv2);
+    vec2 uv = vUv2;
+    if (rand(vUv) > 0.5 && vOffset > 0.5) {
+      uv += vec2(0.5);
+    }
+
+    vec4 texelColor = texture2D(surfaceColor, uv);
 
     #if defined(USE_SPIRAL_TEXTURE)
     // pseudorandomly shift uv using color
