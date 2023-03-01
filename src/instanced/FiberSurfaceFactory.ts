@@ -4,6 +4,7 @@ import { CurveGenerator, CurveGeneratorOptions } from './CurveGenerator'
 import {
   ExtrudedMeshGenerator,
   ExtrudedMeshGeneratorOptions,
+  ShapeType,
 } from './ExtrudedMeshGenerator'
 
 export interface CarpetFactoryOptions
@@ -26,6 +27,7 @@ export class FiberSurfaceFactory {
     maxy: 1,
     sizex: 0.02,
     sizey: 0.02,
+    shapeType: ShapeType.Round,
 
     variance: 2.0,
     length: 0.3,
@@ -108,8 +110,7 @@ void main()	{
     }
     const extrudedMeshGenerator = new ExtrudedMeshGenerator(this.options)
     extrudedMeshGenerator.setCurves(curves)
-    extrudedMeshGenerator.populateShape()
-    const bufferGeomertry = extrudedMeshGenerator.bufferGeometry
+    const bufferGeomertry = extrudedMeshGenerator.generateBufferGeometry()
     const surfaceColorMap = new THREE.TextureLoader().load(
       this.options.surfaceColorMap
     )

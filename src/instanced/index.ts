@@ -14,7 +14,7 @@ const preset1 = {
   sizex: 0.02,
   sizey: 0.02,
   variance: 1.0,
-  length: 0.05,
+  length: 0.08,
   heightSegments: 6.0,
   widthSegments: 5.0,
   width: 0.014,
