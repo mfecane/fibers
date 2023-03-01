@@ -21,21 +21,17 @@ export class FiberSurfaceFactory {
   private static readonly defaults: CarpetFactoryOptions = {
     surfaceColorMap: '',
 
-    minx: -1,
-    miny: -1,
-    maxx: 1,
-    maxy: 1,
-    sizex: 0.02,
-    sizey: 0.02,
     shapeType: ShapeType.Round,
     cellSize: 0.08,
 
-    variance: 2.0,
-    length: 0.3,
+    curvature: 2.0,
+    baseLength: 0.3,
+    lengthVariance: 0.8,
     heightSegments: 3.0,
     widthSegments: 3.0,
     width: 0.01,
     spiralTexture: true,
+    fiberWidth: 0.02,
   }
 
   private static readonly vertexShader = `
@@ -73,6 +69,8 @@ varying vec2 vUv;
 varying vec2 vUv2;
 varying float vOffset;
 
+float TAU = 6.2831853;
+
 void main()	{
     vec4 texelColor = texture2D(surfaceColor, vUv2);
 
@@ -81,10 +79,9 @@ void main()	{
       // pseudorandomly shift uv using color
       // scaled with different factor u and v
       // adjusted to range -0.5, 0.5
-      vec2 scaledUv = fract((vUv + texelColor.xy * 100.0) * vec2(2.0, 6.0)) - vec2(0.5);
-      float spiral = abs(abs(scaledUv.x + scaledUv.y) - 0.5);
-      spiral = smoothstep(0.0, 0.5, spiral);
-
+      vec2 scaledUv = fract(vUv * vec2(2.0, 6.0));
+      float spiral = sin((scaledUv.x + scaledUv.y) * TAU);
+      spiral = smoothstep(1.0, 0.5, spiral);
       texelColor *= (0.6 + 0.4 * spiral);
 
     #endif

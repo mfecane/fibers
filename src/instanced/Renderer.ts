@@ -25,8 +25,6 @@ export class Renderer {
 
     {
       this.renderer = new WebGLRenderer({ antialias: true, alpha: false })
-      // this.renderer.shadowMap.enabled = true
-      // this.renderer.shadowMap.type = PCFSoftShadowMap
       this.renderer.setPixelRatio(window.devicePixelRatio)
       this.renderer.setSize(this.width, this.height)
       this.renderer.setClearColor(0x999999)

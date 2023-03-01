@@ -2,37 +2,42 @@ import { Renderer } from 'src/instanced/Renderer'
 import { ThreeLightsLightScheme } from './ThreeLightLightSceme'
 import * as THREE from 'three'
 import { FiberSurfaceFactory } from './FiberSurfaceFactory'
+import { ShapeType } from './ExtrudedMeshGenerator'
 
 let renderer: Renderer
 
 const preset1 = {
   surfaceColorMap: './texture_light.png',
-  minx: -1,
-  miny: -1,
-  maxx: 1,
-  maxy: 1,
-  sizex: 0.02,
-  sizey: 0.02,
-  variance: 1.0,
-  length: 0.08,
-  heightSegments: 4.0,
-  widthSegments: 5.0,
-  width: 0.02,
-  spiralTexture: false,
-  cellSize: 0.025,
+  spiralTexture: true,
+
+  curvature: 1.0,
+  baseLength: 0.3,
+  lengthVariance: 0.1,
+  fiberWidth: 0.01,
+
+  heightSegments: 8.0,
+  widthSegments: 6.0,
+
+  shapeType: ShapeType.Rect,
+  width: 4,
+  height: 4,
+  cellSize: 0.02,
 }
 
 const preset2 = {
   surfaceColorMap: './texture_light.png',
-  variance: 2.0,
-  length: 0.6,
-  heightSegments: 8.0,
-  widthSegments: 3.0,
-  width: 0.02,
   spiralTexture: true,
 
-  radius: 4.0,
-  cellSize: 0.04,
+  curvature: 2.0,
+  baseLength: 2.0,
+  fiberWidth: 0.1,
+
+  heightSegments: 8.0,
+  widthSegments: 3.0,
+
+  shapeType: ShapeType.Round,
+  radius: 0.5,
+  cellSize: 0.2,
 }
 
 export const exec = () => {

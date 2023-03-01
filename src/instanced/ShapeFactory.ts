@@ -3,12 +3,8 @@ import { Vector3 } from 'three'
 import { MeshGeneratorShape, ShapeType } from './ExtrudedMeshGenerator'
 
 export type ShapeFactoryOptions = {
-  minx?: number
-  miny?: number
-  maxx?: number
-  maxy?: number
-  sizex?: number
-  sizey?: number
+  width?: number
+  height?: number
   radius?: number
   shapeType: ShapeType
   cellSize: number
@@ -27,22 +23,11 @@ export class ShapeFactory {
   }
 
   private generateRectShape(): MeshGeneratorShape {
-    const {
-      minx = -1,
-      miny = -1,
-      maxx = 1,
-      maxy = 1,
-      sizex = 0.02,
-      sizey = 0.02,
-    } = this.options
+    const { width = 4, height = 3, cellSize = 0.02 } = this.options
     const origins: THREE.Vector3[] = []
-    for (let x = minx; x < maxx; x += sizex) {
-      for (let y = miny; y < maxy; y += sizey) {
-        let pointx = x + (Math.random() - 0.5) * sizex * 0.5
-        let pointy = y + (Math.random() - 0.5) * sizey * 0.5
-        pointx = pointx < minx ? minx : pointx > maxx ? maxx : pointx
-        pointy = pointy < miny ? miny : pointy > maxy ? maxy : pointy
-        origins.push(new THREE.Vector3(pointx, 0, pointy))
+    for (let x = -width / 2; x < width / 2; x += cellSize) {
+      for (let y = -height / 2; y < height / 2; y += cellSize) {
+        origins.push(this.randomShift(new THREE.Vector3(x, 0, y)))
       }
     }
     return origins

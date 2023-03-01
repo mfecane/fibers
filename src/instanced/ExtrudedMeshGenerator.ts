@@ -1,15 +1,9 @@
 import { cloneDeep } from 'lodash'
 import * as THREE from 'three'
 import { BufferGeometry, Vector3 } from 'three'
+import { FiberCurve } from './CurveGenerator'
 import { MeshPrototypeGenerator } from './MeshPrototypeGenerator'
 import { ShapeFactory, ShapeFactoryOptions } from './ShapeFactory'
-
-export type FiberPoint = {
-  position: [x: number, y: number, z: number]
-  width: number
-}
-
-export type FiberCurve = FiberPoint[]
 
 export type BufferChunk = {
   vertices: [number, number, number][]
