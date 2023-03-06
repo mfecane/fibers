@@ -7,9 +7,12 @@ export class OrgitControls {
 	leftPressed = false
 
 	lastPos: MousePosition = [0, 0]
-	clonePosition: number[] = [0, 0, 5]
+	private distance = 20
+	private clonePosition: number[] = [0, 0, this.distance]
+	private camera
 
-	constructor(private camera: Camera, private renderer: Renderer) {
+	public constructor(private renderer: Renderer) {
+		this.camera = this.renderer.camera
 		this.handleClick = this.handleClick.bind(this)
 		this.handleMouseMove = this.handleMouseMove.bind(this)
 		this.handleMousUp = this.handleMousUp.bind(this)
@@ -19,6 +22,9 @@ export class OrgitControls {
 	}
 
 	update() {
+		if (!this.camera) {
+			throw 'No camera'
+		}
 		this.camera.position = this.clonePosition
 	}
 
@@ -33,7 +39,7 @@ export class OrgitControls {
 		if (this.leftPressed) {
 			const mousePos = [e.x, e.y]
 			const diffX = this.lastPos[1] - mousePos[0]
-			this.clonePosition = [Math.sin(diffX / 100) * 5.0, 1.0, Math.cos(diffX / 100) * 5.0]
+			this.clonePosition = [Math.sin(diffX / 100) * this.distance, 1.0, Math.cos(diffX / 100) * this.distance]
 			// this.lastPos = mousePos
 		}
 	}

@@ -1,25 +1,13 @@
 import {Optional} from 'typescript-optional'
 import {fragmentShaderSource, vertexShaderSource} from './Shaders'
-import {mat4} from 'gl-matrix'
-import {Camera} from './Camera'
+import {Renderer} from './Renderer'
 
-export class Renderer {
-	public canvas: HTMLCanvasElement
-	public context: WebGL2RenderingContext
-	public width = 0
-	public height = 0
-
-	public camera?: Camera
-
+export class Mesh {
 	private projectionLocation: WebGLUniformLocation
 	private cameraLocation: WebGLUniformLocation
 
-	constructor() {
-		this.canvas = document.createElement(`canvas`)
-		document.body.appendChild(this.canvas)
-		this.canvas.id = 'canvas'
-		this.context = Optional.ofNullable(this.canvas.getContext('webgl2')).orElseThrow(() => 'Failed to create context')
-		const gl = this.context
+	constructor(private renderer: Renderer) {
+		const gl = this.renderer.context
 
 		const vertShader = Optional.ofNullable(gl.createShader(gl.VERTEX_SHADER)).orElseThrow(
 			() => 'Fail to create vertex shader'
@@ -93,20 +81,14 @@ export class Renderer {
 		this.cameraLocation = Optional.ofNullable(gl.getUniformLocation(program, 'cameraMatrix')).orElseThrow(
 			() => 'No location'
 		)
-
-		this.width = window.innerWidth
-		this.height = window.innerHeight
-
-		this.canvas.width = window.innerWidth
-		this.canvas.height = window.innerHeight
-
-		gl.viewport(0, 0, this.width, this.height)
 	}
 
-	public draw() {
-		const gl = this.context
-		gl.clearColor(0.0, 0.0, 0.0, 1.0)
-		gl.clear(gl.COLOR_BUFFER_BIT)
-		gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0)
+	public update() {
+		const gl = this.renderer.context
+		if (!this.renderer.camera) {
+			throw 'No camera'
+		}
+		gl.uniformMatrix4fv(this.projectionLocation, false, this.renderer.camera.projectionMatrix)
+		gl.uniformMatrix4fv(this.cameraLocation, false, this.renderer.camera.cameraMatrix)
 	}
 }
