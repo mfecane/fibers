@@ -1,15 +1,18 @@
 import {Optional} from 'typescript-optional'
 import {fragmentShaderSource, vertexShaderSource} from './shaders'
 import {mat4} from 'gl-matrix'
+import {Camera} from './Camera'
 
 export class Renderer {
 	private canvas: HTMLCanvasElement
 	private context: WebGL2RenderingContext
-	private width = 0
-	private height = 0
+	public width = 0
+	public height = 0
 
-	private projectionMatrix: mat4
-	private cameraMatrix: mat4
+	public camera?: Camera
+
+	private projectionLocation: WebGLUniformLocation
+	private cameraLocation: WebGLUniformLocation
 
 	constructor() {
 		this.canvas = document.createElement(`canvas`)
@@ -77,8 +80,12 @@ export class Renderer {
 		gl.enableVertexAttribArray(position_attrib_location)
 		gl.vertexAttribPointer(position_attrib_location, 3, gl.FLOAT, false, 0, 0)
 
-		const loc1 = gl.getUniformLocation(program, 'projectionMatrix')
-		const loc2 = gl.getUniformLocation(program, 'cameraMatrix')
+		this.projectionLocation = Optional.ofNullable(gl.getUniformLocation(program, 'projectionMatrix')).orElseThrow(
+			() => 'No location'
+		)
+		this.cameraLocation = Optional.ofNullable(gl.getUniformLocation(program, 'cameraMatrix')).orElseThrow(
+			() => 'No location'
+		)
 
 		this.width = window.innerWidth
 		this.height = window.innerHeight
@@ -87,34 +94,17 @@ export class Renderer {
 		this.canvas.height = window.innerHeight
 
 		gl.viewport(0, 0, this.width, this.height)
+	}
 
-		this.projectionMatrix = mat4.create()
-		this.cameraMatrix = mat4.create()
-		this.updateMatrices()
-
-		console.log('this.projectionMatrix', this.projectionMatrix)
-		gl.uniformMatrix4fv(loc1, false, this.projectionMatrix)
-
-		console.log('this.cameraMatrix', this.cameraMatrix)
-		gl.uniformMatrix4fv(loc2, false, this.cameraMatrix)
-
+	public draw() {
+		const gl = this.context
+		if (!this.camera) {
+			throw 'No camera'
+		}
+		gl.uniformMatrix4fv(this.projectionLocation, false, this.camera.projectionMatrix)
+		gl.uniformMatrix4fv(this.cameraLocation, false, this.camera.cameraMatrix)
 		gl.clearColor(0.0, 0.0, 0.0, 1.0)
 		gl.clear(gl.COLOR_BUFFER_BIT)
 		gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0)
-	}
-
-	updateMatrices() {
-		const fieldOfView = (45 * Math.PI) / 180
-		const aspectRatio = this.width / this.height
-		const near = 0.1
-		const far = 100
-		mat4.perspective(this.projectionMatrix, fieldOfView, aspectRatio, near, far)
-
-		const cameraPosition = new Float32Array([0, 0, 5])
-		const center = new Float32Array([0, 0, 0])
-		const cameraUp = new Float32Array([0, 1, 0])
-
-		// Create a view matrix
-		mat4.lookAt(this.cameraMatrix, cameraPosition, center, cameraUp)
 	}
 }
