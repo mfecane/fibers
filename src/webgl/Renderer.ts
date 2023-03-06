@@ -4,7 +4,7 @@ import {mat4} from 'gl-matrix'
 import {Camera} from './Camera'
 
 export class Renderer {
-	private canvas: HTMLCanvasElement
+	public canvas: HTMLCanvasElement
 	private context: WebGL2RenderingContext
 	public width = 0
 	public height = 0
@@ -59,11 +59,14 @@ export class Renderer {
 		const vertexBuffer = gl.createBuffer()
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
 		// prettier-ignore
+
+		// 20 bytes - 3x4 floats position 2x4 floats uvs
+
 		const positions = [
-			-1, -1, 0,
-			1, -1, 0,
-			1, 1, 0,
-			-1, 1, 0
+			-1, -1, 0, 0, 0,
+			 1, -1, 0, 1, 0,
+			 1,  1, 0, 1, 1,
+			-1,  1, 0, 0, 1
 		];
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
 
@@ -76,9 +79,13 @@ export class Renderer {
 		];
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
 
-		const position_attrib_location = gl.getAttribLocation(program, 'position')
-		gl.enableVertexAttribArray(position_attrib_location)
-		gl.vertexAttribPointer(position_attrib_location, 3, gl.FLOAT, false, 0, 0)
+		const positionAttributeLocation = gl.getAttribLocation(program, 'aPosition')
+		gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 20, 0)
+		gl.enableVertexAttribArray(positionAttributeLocation)
+
+		const uvAttributeLocation = gl.getAttribLocation(program, 'aTexCoord')
+		gl.vertexAttribPointer(uvAttributeLocation, 2, gl.FLOAT, false, 20, 12)
+		gl.enableVertexAttribArray(uvAttributeLocation)
 
 		this.projectionLocation = Optional.ofNullable(gl.getUniformLocation(program, 'projectionMatrix')).orElseThrow(
 			() => 'No location'

@@ -9,7 +9,7 @@ let camera: Camera
 export function start() {
 	renderer = new Renderer()
 	camera = new Camera(renderer)
-	orbitControls = new OrgitControls(camera)
+	orbitControls = new OrgitControls(camera, renderer)
 	renderer.camera = camera
 	animate()
 }
