@@ -1,25 +1,25 @@
 import * as THREE from 'three'
 import { Mesh } from 'three'
 import { CurveGenerator, CurveGeneratorOptions } from './CurveGenerator'
-import {
-  ExtrudedMeshGenerator,
-  ExtrudedMeshGeneratorOptions,
-  ShapeType,
-} from './ExtrudedMeshGenerator'
+import { ExtrudedMeshGenerator, ExtrudedMeshGeneratorOptions, ShapeType } from './ExtrudedMeshGenerator'
+import { Graphics } from './Graphics'
+import { ThreeJsOld } from './ThreeJsOld'
 
-export interface CarpetFactoryOptions
-  extends CurveGeneratorOptions,
-    ExtrudedMeshGeneratorOptions {
+export interface CarpetFactoryOptions extends CurveGeneratorOptions, ExtrudedMeshGeneratorOptions {
   surfaceColorMap: string
   spiralTexture: boolean
+  gamma: number
 }
 
-export class FiberSurfaceFactory {
+export class FiberSurface {
   private readonly options: CarpetFactoryOptions
-  public mesh?: Mesh
+  private static readonly CURVES_TO_GENERATE = 50
+  private readonly three: any
 
   private static readonly defaults: CarpetFactoryOptions = {
     surfaceColorMap: '',
+    spiralTexture: true,
+    gamma: 1.0,
 
     shapeType: ShapeType.Round,
     cellSize: 0.08,
@@ -32,7 +32,6 @@ export class FiberSurfaceFactory {
     heightSegments: 3.0,
     widthSegments: 3.0,
     width: 0.01,
-    spiralTexture: true,
     fiberWidth: 0.02,
   }
 
@@ -49,15 +48,22 @@ attribute float offsets;
 attribute vec2 uv;
 attribute vec2 uv2;
 
+uniform float logDepthBufFC;
+
 varying vec2 vUv;
 varying vec2 vUv2;
 varying float vOffset;
+
+#define EPSILON 1e-6
 
 void main()	{
     vUv = uv;
     vUv2 = uv2;
     vOffset = offsets;
     gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+	// depth buffer
+	gl_Position.z = log2( max( EPSILON, gl_Position.w + 1.0 ) ) * logDepthBufFC - 1.0;
+	gl_Position.z *= gl_Position.w;
 }
 `
 
@@ -67,6 +73,7 @@ precision mediump int;
 
 uniform sampler2D surfaceColor;
 uniform float spiralRatio;
+uniform float gamma;
 
 varying vec2 vUv;
 varying vec2 vUv2;
@@ -77,6 +84,8 @@ float TAU = 6.2831853;
 void main()	{
     vec4 texelColor = texture2D(surfaceColor, vUv2);
 
+	texelColor.rgb = pow(texelColor.rgb, vec3(1.0 / gamma));
+
     #if defined(USE_SPIRAL_TEXTURE)
 
       vec2 scaledUv = fract(vUv * vec2(3.0, 3.0 * spiralRatio));
@@ -86,34 +95,40 @@ void main()	{
     #endif
 
     texelColor *= (0.2 + vOffset * 0.8);
-    gl_FragColor = vec4(texelColor.xyz * 1.5 , 1.0);
+    gl_FragColor = vec4(texelColor.xyz, 1.0);
+
 }
 `
 
-  public constructor(options: Partial<CarpetFactoryOptions>) {
+  public constructor(
+    options: Partial<CarpetFactoryOptions>,
+    private readonly graphics: Graphics,
+    private readonly three: ThreeJsOld
+  ) {
     this.options = {
-      ...FiberSurfaceFactory.defaults,
+      ...FiberSurface.defaults,
       ...options,
     }
-    this.createObjects()
   }
 
-  private createObjects(): void {
-    const curveGenerator = new CurveGenerator(this.options)
+  public build(): Mesh {
+    console.log('generate')
+
+    const curveGenerator = new CurveGenerator(this.options, this.three)
     const curves = []
-    for (let i = 0; i < 200; ++i) {
-      curves.push(curveGenerator.generateCurve())
+    for (let i = 0; i < FiberSurface.CURVES_TO_GENERATE; ++i) {
+      const enthropy = i / FiberSurface.CURVES_TO_GENERATE
+      curves.push(curveGenerator.generateCurve(enthropy))
     }
-    const extrudedMeshGenerator = new ExtrudedMeshGenerator(this.options)
+    const extrudedMeshGenerator = new ExtrudedMeshGenerator(this.options, this.three)
     extrudedMeshGenerator.setCurves(curves)
     const bufferGeomertry = extrudedMeshGenerator.generateBufferGeometry()
-    const surfaceColorMap = new THREE.TextureLoader().load(
-      this.options.surfaceColorMap
-    )
+    const surfaceColorMap = new THREE.TextureLoader().load(this.options.surfaceColorMap)
     const defines: any = {}
     if (this.options.spiralTexture) {
       defines.USE_SPIRAL_TEXTURE = true
     }
+
     const material = new THREE.RawShaderMaterial({
       defines,
       uniforms: {
@@ -121,13 +136,18 @@ void main()	{
         spiralRatio: {
           value: this.options.baseLength / this.options.fiberWidth / 4.0,
         },
+        gamma: {
+          value: this.options.gamma,
+        },
+        logDepthBufFC: {
+          value: 2.0 / (Math.log(this.graphics.camera.far + 1.0) / Math.LN2),
+        },
       },
-      vertexShader: FiberSurfaceFactory.vertexShader,
-      fragmentShader: FiberSurfaceFactory.fragmentShader,
+      vertexShader: FiberSurface.vertexShader,
+      fragmentShader: FiberSurface.fragmentShader,
       side: THREE.DoubleSide,
-      transparent: true,
     })
 
-    this.mesh = new THREE.Mesh(bufferGeomertry, material)
+    return new THREE.Mesh(bufferGeomertry, material)
   }
 }

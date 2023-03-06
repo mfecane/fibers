@@ -1,7 +1,7 @@
 import { Renderer } from 'src/instanced/Renderer'
 import { ThreeLightsLightScheme } from './ThreeLightLightSceme'
 import * as THREE from 'three'
-import { FiberSurfaceFactory } from './FiberSurfaceFactory'
+import { FiberSurface } from './FiberSurface'
 import { ShapeType } from './ExtrudedMeshGenerator'
 
 let renderer: Renderer
@@ -75,6 +75,7 @@ export const exec = () => {
 }
 
 function createObjects(): void {
-  const carpetFactory = new FiberSurfaceFactory(preset3)
-  renderer.scene.add(carpetFactory.mesh!)
+  const carpetFactory = new FiberSurface(preset3)
+  const mesh = carpetFactory.build()
+  renderer.scene.add(mesh)
 }

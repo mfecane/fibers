@@ -31,7 +31,7 @@ export class ExtrudedMeshGenerator {
   private readonly meshPrototypeGenerator: MeshPrototypeGenerator
   private readonly shapeFactory: ShapeFactory
 
-  public constructor(private readonly options: ExtrudedMeshGeneratorOptions) {
+  public constructor(private readonly options: ExtrudedMeshGeneratorOptions, private three: any) {
     this.meshPrototypeGenerator = new MeshPrototypeGenerator(options)
     this.shapeFactory = new ShapeFactory(options)
   }
@@ -89,11 +89,7 @@ export class ExtrudedMeshGenerator {
     target.uvs.push(...source.uvs)
     target.uvs2.push(...source.uvs2)
     target.normals.push(...source.normals)
-    target.indices.push(
-      ...source.indices.map((layerIndices) =>
-        layerIndices.map((index) => startIndex + index)
-      )
-    )
+    target.indices.push(...source.indices.map((layerIndices) => layerIndices.map((index) => startIndex + index)))
     target.offsets.push(...source.offsets)
   }
 
@@ -101,26 +97,11 @@ export class ExtrudedMeshGenerator {
     const bufferGeometry = new THREE.BufferGeometry()
 
     bufferGeometry.setIndex(chunk.indices.flat())
-    bufferGeometry.setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(chunk.vertices.flat(), 3)
-    )
-    bufferGeometry.setAttribute(
-      'uv',
-      new THREE.Float32BufferAttribute(chunk.uvs.flat(), 2)
-    )
-    bufferGeometry.setAttribute(
-      'uv2',
-      new THREE.Float32BufferAttribute(chunk.uvs2.flat(), 2)
-    )
-    bufferGeometry.setAttribute(
-      'normal',
-      new THREE.Float32BufferAttribute(chunk.normals.flat(), 3)
-    )
-    bufferGeometry.setAttribute(
-      'offsets',
-      new THREE.Float32BufferAttribute(chunk.offsets, 1)
-    )
+    bufferGeometry.setAttribute('position', new THREE.Float32BufferAttribute(chunk.vertices.flat(), 3))
+    bufferGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(chunk.uvs.flat(), 2))
+    bufferGeometry.setAttribute('uv2', new THREE.Float32BufferAttribute(chunk.uvs2.flat(), 2))
+    bufferGeometry.setAttribute('normal', new THREE.Float32BufferAttribute(chunk.normals.flat(), 3))
+    bufferGeometry.setAttribute('offsets', new THREE.Float32BufferAttribute(chunk.offsets, 1))
     return bufferGeometry
   }
 }
