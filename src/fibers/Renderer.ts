@@ -1,12 +1,13 @@
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass.js'
+import * as THREE from 'three'
 import {Group, PerspectiveCamera, Scene, WebGLRenderer} from 'three'
 import {LightScheme} from './LightScheme'
 
 export class Renderer {
 	public readonly scene: THREE.Scene
-	public readonly perspCamera: THREE.PerspectiveCamera
+	public readonly camera: THREE.PerspectiveCamera
 	public width = 10
 	public height = 10
 	public readonly controls: OrbitControls
@@ -29,9 +30,9 @@ export class Renderer {
 		}
 
 		{
-			this.perspCamera = new PerspectiveCamera(45, this.width / this.height, 0.1, 1000)
-			this.perspCamera.position.set(0.5, 0.5, 2)
-			this.perspCamera.lookAt(0, 0, 0)
+			this.camera = new THREE.PerspectiveCamera(60, this.width / this.height, 0.1, 2000)
+			this.camera.position.set(0.5, 0.5, 2)
+			this.camera.lookAt(0, 0, 0)
 		}
 
 		this.updateSize()
@@ -39,18 +40,18 @@ export class Renderer {
 		{
 			this.composer = new EffectComposer(this.renderer)
 			this.composer.setSize(this.width, this.height)
-			this.composer.addPass(new RenderPass(this.scene, this.perspCamera))
+			this.composer.addPass(new RenderPass(this.scene, this.camera))
 		}
 
 		{
-			this.controls = new OrbitControls(this.perspCamera, this.renderer.domElement)
+			this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 			this.controls.minDistance = 0.5
 			this.controls.maxDistance = 20
 			// this.controls.maxPolarAngle = (7.5 * Math.PI) / 16
 			this.controls.target.set(0, 0, 0)
 			this.controls.enableDamping = true
 			this.controls.zoomSpeed = 0.5
-			this.controls.enablePan = false
+			// this.controls.enablePan = false
 		}
 
 		window.addEventListener('resize', this.updateSize)
@@ -69,8 +70,8 @@ export class Renderer {
 		const rect = this.root.getBoundingClientRect()
 		this.width = rect.width
 		this.height = rect.height
-		this.perspCamera.aspect = this.width / this.height
-		this.perspCamera.updateProjectionMatrix()
+		this.camera.aspect = this.width / this.height
+		this.camera.updateProjectionMatrix()
 		this.renderer.setSize(this.width, this.height)
 	}
 

@@ -47,7 +47,7 @@ float rayMarch(vec3 ro, vec3 rd) {
         float dS = sceneDistance(p);
         dO += dS;
         if (dO > MAX_DIST || abs(dS) < SURF_DIST) {
-        break;
+            break;
         }
     }
 
@@ -72,7 +72,7 @@ void main()	{
     
     vec3 rayOrigin = cameraPosition;
     vec3 rayDirection = (cameraWorldMatrix * cameraProjectionMatrixInverse * ndcRay).xyz;
-    rayDirection = normalize( rayDirection );
+    rayDirection = normalize(rayDirection);
 
     float d = rayMarch(rayOrigin, rayDirection);
 
@@ -83,9 +83,6 @@ void main()	{
         vec3 n = GetNormal(p);
         float dif = dot(n, normalize(vec3(1.0, 2.0, -3.0))) * 0.5 + 0.5;
         col = vec3(dif) * 0.2;
-
-        // TODO i think i should account for resolution
-        // since the center seem to be offset
 
         vec4 clipPos = cameraProjectionMatrix * cameraWorldMatrixInverse * vec4(p, 1.0);
         gl_FragDepth = (clipPos.z / clipPos.w) * 0.5 + 0.5;
