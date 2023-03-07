@@ -7,8 +7,8 @@ import {LightScheme} from './LightScheme'
 export class Renderer {
 	public readonly scene: THREE.Scene
 	public readonly perspCamera: THREE.PerspectiveCamera
-	private width = 10
-	private height = 10
+	public width = 10
+	public height = 10
 	public readonly controls: OrbitControls
 	private readonly renderer: WebGLRenderer
 	private readonly composer: EffectComposer
@@ -45,7 +45,7 @@ export class Renderer {
 		{
 			this.controls = new OrbitControls(this.perspCamera, this.renderer.domElement)
 			this.controls.minDistance = 0.1
-			this.controls.maxDistance = 10
+			this.controls.maxDistance = 200
 			this.controls.maxPolarAngle = (7.5 * Math.PI) / 16
 			this.controls.target.set(0, 0, 0)
 			this.controls.enableDamping = true

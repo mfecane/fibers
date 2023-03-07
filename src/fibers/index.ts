@@ -15,7 +15,7 @@ export const exec = () => {
 	renderer = new Renderer(div)
 	new ThreeLightsLightScheme(renderer)
 
-	raymarcher = new Raymarcher(renderer.controls)
+	raymarcher = new Raymarcher(renderer)
 	const mesh = raymarcher.build()
 	renderer.scene.add(mesh)
 

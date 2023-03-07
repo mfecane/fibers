@@ -3,22 +3,19 @@ precision mediump float;
 
 layout(location = 0) in vec3 position;
 
-out vec2 vUV;
-
-uniform mat4 projectionMatrix;
-
-void main()	{
-	vUV = position.xy;
-	gl_Position = vec4(position, 1.0);
+void main()	{			
+    gl_Position = vec4(position, 1.0);
 }`
 
 export const fragmentShaderSource = `#version 300 es
 precision mediump float;
 
-uniform float phi;
-uniform float theta;
+uniform vec2 resolution;
+uniform mat4 viewMatrix;
+uniform vec3 cameraPosition;
+uniform mat4 cameraWorldMatrix;
+uniform mat4 cameraProjectionMatrixInverse;
 
-in vec2 vUV;
 out vec4 FragColor;
 
 #define PI  3.14159265358
@@ -27,8 +24,6 @@ out vec4 FragColor;
 #define MAX_STEPS 100
 #define MAX_DIST 100.0
 #define SURF_DIST 0.00001 // hit distance
-
-#define u_radius 1.0
 
 #define R(p, a) p = cos(a) * p + sin(a) * vec2(p.y, -p.x)
 
@@ -70,22 +65,29 @@ vec3 GetNormal(vec3 p) {
 }
   
 void main()	{
-    vec3 col = vec3(0.0, 0.0, 0.0);
+    vec2 screenPos = (gl_FragCoord.xy * 2.0 - resolution) / resolution;
 
-    vec3 rayDirection = normalize(vec3(vUV.x - 0.5, vUV.y - 0.5, 1.0));
-    vec3 rayOrigin = vec3(0.0, 0.0, -4.0);
+    vec4 ndcRay = vec4(screenPos.xy, 1.0, 1.0);
 
-    vec2 rot = vec2(
-        -theta + PI / 2.0,
-        -phi
-    );
+    // convert ray direction from normalized device coordinate to world coordinate
+    vec3 rayDirection = ( cameraWorldMatrix * cameraProjectionMatrixInverse * ndcRay ).xyz;
+    rayDirection = normalize( rayDirection );
 
-    R(rayDirection.yz, -rot.x);
-    R(rayDirection.xz, rot.y);
-    R(rayOrigin.yz, -rot.x);
-    R(rayOrigin.xz, rot.y);
+    vec3 rayOrigin = cameraPosition;
+
+    // vec2 rot = vec2(
+    //     -theta + PI / 2.0,
+    //     -phi
+    // );
+
+    // R(rayDirection.yz, -rot.x);
+    // R(rayDirection.xz, rot.y);
+    // R(rayOrigin.yz, -rot.x);
+    // R(rayOrigin.xz, rot.y);
 
     float d = rayMarch(rayOrigin, rayDirection);
+
+    vec3 col = vec3(0.0, 0.0, 0.0);
 
     if(d < MAX_DIST) {
         vec3 p = rayOrigin + rayDirection * d;

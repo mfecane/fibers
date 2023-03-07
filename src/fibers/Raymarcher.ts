@@ -2,13 +2,14 @@ import {Mesh, OrthographicCamera, PerspectiveCamera, PlaneGeometry, RawShaderMat
 import * as THREE from 'three'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 import {fragmentShaderSource, vertexShaderSource} from 'src/shaders/raymarcher'
+import {Renderer} from './Renderer'
 
 export class Raymarcher {
 	private material: RawShaderMaterial = new RawShaderMaterial()
-	private camera: OrthographicCamera
+	private camera: PerspectiveCamera
 
-	public constructor(private orbitControls: OrbitControls) {
-		this.camera = new THREE.OrthographicCamera(0, 1, 0, 1, 1, 1000)
+	public constructor(private readonly renderer: Renderer) {
+		this.camera = renderer.perspCamera
 	}
 
 	public build(): Mesh {
@@ -29,13 +30,17 @@ export class Raymarcher {
 
 		this.material = new THREE.RawShaderMaterial({
 			uniforms: {
+				resolution: {value: new THREE.Vector2(this.renderer.width, this.renderer.height)},
 				theta: {
-					value: this.orbitControls.getPolarAngle(),
+					value: this.renderer.controls.getPolarAngle(),
 				},
 				phi: {
-					value: this.orbitControls.getAzimuthalAngle(),
+					value: this.renderer.controls.getAzimuthalAngle(),
 				},
 				projectionMatrix: {value: this.camera.projectionMatrix.clone()},
+				cameraWorldMatrix: {value: this.camera.matrixWorld.clone()},
+				cameraProjectionMatrixInverse: {value: this.camera.projectionMatrixInverse.clone()},
+				cameraPosition: {value: this.camera.position.clone()},
 			},
 			vertexShader: vertexShaderSource,
 			fragmentShader: fragmentShaderSource,
@@ -46,8 +51,12 @@ export class Raymarcher {
 	}
 
 	update() {
-		this.material.uniforms.projectionMatrix.value.copy(this.camera.projectionMatrix)
-		this.material.uniforms.theta.value = this.orbitControls.getPolarAngle()
-		this.material.uniforms.phi.value = this.orbitControls.getAzimuthalAngle()
+		// this.material.uniforms.projectionMatrix.value.copy(this.camera.projectionMatrix)
+		// this.material.uniforms.theta.value = this.renderer.controls.getPolarAngle()
+		// this.material.uniforms.phi.value = this.renderer.controls.getAzimuthalAngle()
+
+		this.material.uniforms.cameraWorldMatrix.value = this.camera.matrixWorld.clone()
+		this.material.uniforms.cameraProjectionMatrixInverse.value = this.camera.projectionMatrixInverse.clone()
+		this.material.uniforms.cameraPosition.value = this.camera.position.clone()
 	}
 }
