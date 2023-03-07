@@ -2,8 +2,9 @@ export class FiberGenerator {
 	public positions: number[][] = []
 	public indices: number[][] = []
 
-	public segments = 4
-	private length = 3
+	public segments = 8
+	private length = 0.5
+	private width = 0.012
 
 	constructor() {
 		const width = this.getWidth(0)
@@ -41,6 +42,6 @@ export class FiberGenerator {
 	}
 
 	private getWidth(segment: number) {
-		return 0.12 - (segment / this.segments) * 0.06
+		return this.width - ((segment / this.segments) * this.width) / 2
 	}
 }

@@ -18,6 +18,7 @@ void main()	{
     vUV = aTexCoord;
     vec4 rootPosition = projectionMatrix * cameraMatrix * vec4(aInstanceData, 1.0);
     gl_Position = rootPosition + projectionMatrix * vec4(aPosition, 0.0, 1.0);
+    gl_Position.x += sin(aInstanceData.x + aInstanceData.y + vUV.y * 10.0) * vUV.y * 0.05;
     gl_Position.z = log2(max(EPSILON, gl_Position.w + 1.0)) * logDepthBufFC - 1.0;
     gl_Position.z *= gl_Position.w;
 }

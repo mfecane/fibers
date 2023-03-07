@@ -8,7 +8,7 @@ export class Mesh {
 	private cameraLocation: WebGLUniformLocation
 	private logDepthBufFCLocation: WebGLUniformLocation
 
-	private readonly instancesCount = 200000
+	private readonly instancesCount = 800000
 	private readonly instanceData: number[] = []
 
 	private elements = 0

@@ -23,9 +23,11 @@ export class OrgitControls {
 		this.handleClick = this.handleClick.bind(this)
 		this.handleMouseMove = this.handleMouseMove.bind(this)
 		this.handleMousUp = this.handleMousUp.bind(this)
+		this.handleWheel = this.handleWheel.bind(this)
 		renderer.canvas.addEventListener('mousedown', this.handleClick)
 		renderer.canvas.addEventListener('mousemove', this.handleMouseMove)
 		renderer.canvas.addEventListener('mouseup', this.handleMousUp)
+		renderer.canvas.addEventListener('wheel', this.handleWheel)
 	}
 
 	update() {
@@ -65,5 +67,15 @@ export class OrgitControls {
 
 	handleMousUp() {
 		this.leftPressed = false
+	}
+
+	handleWheel(e: WheelEvent) {
+		e.preventDefault()
+		const delta = e.deltaY
+		if (delta > 0) {
+			this.distance *= 1.02
+		} else {
+			this.distance *= 0.98
+		}
 	}
 }
