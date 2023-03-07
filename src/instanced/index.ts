@@ -21,7 +21,7 @@ export function start() {
 function animate() {
 	orbitControls.update()
 	camera.update()
-	mesh.update()
 	renderer.draw()
+	mesh.update()
 	requestAnimationFrame(animate)
 }

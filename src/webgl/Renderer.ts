@@ -107,6 +107,5 @@ export class Renderer {
 		const gl = this.context
 		gl.clearColor(0.0, 0.0, 0.0, 1.0)
 		gl.clear(gl.COLOR_BUFFER_BIT)
-		gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0)
 	}
 }

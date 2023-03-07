@@ -3,6 +3,7 @@ precision mediump float;
 
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec2 aTexCoord;
+layout(location = 2) in vec3 aInstanceData;
 
 out vec4 glPosition;
 out vec2 vUV;
@@ -12,7 +13,7 @@ uniform mat4 cameraMatrix;
 
 void main()	{
     vUV = aTexCoord;
-    gl_Position = projectionMatrix * cameraMatrix * vec4( aPosition, 1.0 );
+    gl_Position = projectionMatrix * cameraMatrix * vec4(aPosition + aInstanceData, 1.0);
 }
 `
 

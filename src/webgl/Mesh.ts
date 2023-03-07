@@ -44,51 +44,75 @@ export class Mesh {
 
 		gl.useProgram(program)
 
-		const vertexBuffer = gl.createBuffer()
-		gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
-		// prettier-ignore
+		// BUFFERS
+		{
+			const vertexBuffer = gl.createBuffer()
+			gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
+			// prettier-ignore
 
-		// 20 bytes - 3x4 floats position 2x4 floats uvs
+			// 20 bytes - 3x4 floats position 2x4 floats uvs
 
-		const positions = [
-			-1, -1, 0, 0, 0,
-			 1, -1, 0, 1, 0,
-			 1,  1, 0, 1, 1,
-			-1,  1, 0, 0, 1
-		];
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
+			const positions = [
+				-1, -1, 0, 0, 0,
+				1, -1, 0, 1, 0,
+				1,  1, 0, 1, 1,
+				-1,  1, 0, 0, 1
+			];
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
 
-		const indexBuffer = gl.createBuffer()
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
-		// prettier-ignore
-		const indices = [
-			0, 1, 2,
-			2, 3, 0
-		];
-		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
+			const indexBuffer = gl.createBuffer()
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
+			// prettier-ignore
+			const indices = [
+				0, 1, 2,
+				2, 3, 0
+			];
+			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
 
-		const positionAttributeLocation = gl.getAttribLocation(program, 'aPosition')
-		gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 20, 0)
-		gl.enableVertexAttribArray(positionAttributeLocation)
+			const positionAttributeLocation = gl.getAttribLocation(program, 'aPosition')
+			gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 20, 0)
+			gl.enableVertexAttribArray(positionAttributeLocation)
 
-		const uvAttributeLocation = gl.getAttribLocation(program, 'aTexCoord')
-		gl.vertexAttribPointer(uvAttributeLocation, 2, gl.FLOAT, false, 20, 12)
-		gl.enableVertexAttribArray(uvAttributeLocation)
+			const uvAttributeLocation = gl.getAttribLocation(program, 'aTexCoord')
+			gl.vertexAttribPointer(uvAttributeLocation, 2, gl.FLOAT, false, 20, 12)
+			gl.enableVertexAttribArray(uvAttributeLocation)
 
-		this.projectionLocation = Optional.ofNullable(gl.getUniformLocation(program, 'projectionMatrix')).orElseThrow(
-			() => 'No location'
-		)
-		this.cameraLocation = Optional.ofNullable(gl.getUniformLocation(program, 'cameraMatrix')).orElseThrow(
-			() => 'No location'
-		)
+			const instanceBuffer = gl.createBuffer()
+			gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer)
+
+			// prettier-ignore
+			const instanceData = [
+				// Instance 1
+				1.0, 0.0, 0.0,
+				// Instance 2
+				0.0, 1.0, 0.0,
+				// Instance 3
+				0.0, 0.0, 1.0
+			];
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(instanceData), gl.STATIC_DRAW)
+
+			const aInstanceDataLocation = gl.getAttribLocation(program, 'aInstanceData')
+			gl.enableVertexAttribArray(aInstanceDataLocation)
+			gl.vertexAttribPointer(aInstanceDataLocation, 3, gl.FLOAT, false, 0, 0)
+			gl.vertexAttribDivisor(aInstanceDataLocation, 1)
+
+			this.projectionLocation = Optional.ofNullable(gl.getUniformLocation(program, 'projectionMatrix')).orElseThrow(
+				() => 'No location'
+			)
+			this.cameraLocation = Optional.ofNullable(gl.getUniformLocation(program, 'cameraMatrix')).orElseThrow(
+				() => 'No location'
+			)
+		}
 	}
 
 	public update() {
 		const gl = this.renderer.context
-		if (!this.renderer.camera) {
+		const camera = this.renderer.camera
+		if (!camera) {
 			throw 'No camera'
 		}
-		gl.uniformMatrix4fv(this.projectionLocation, false, this.renderer.camera.projectionMatrix)
-		gl.uniformMatrix4fv(this.cameraLocation, false, this.renderer.camera.cameraMatrix)
+		gl.uniformMatrix4fv(this.projectionLocation, false, camera.projectionMatrix)
+		gl.uniformMatrix4fv(this.cameraLocation, false, camera.cameraMatrix)
+		gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0, 3)
 	}
 }
