@@ -13,7 +13,8 @@ uniform mat4 cameraMatrix;
 
 void main()	{
     vUV = aTexCoord;
-    gl_Position = projectionMatrix * cameraMatrix * vec4(aPosition + aInstanceData, 1.0);
+    vec4 rootPosition = projectionMatrix * cameraMatrix * vec4(aInstanceData, 1.0);
+    gl_Position = rootPosition + projectionMatrix * vec4(aPosition, 1.0);
 }
 `
 

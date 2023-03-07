@@ -6,6 +6,9 @@ export class Mesh {
 	private projectionLocation: WebGLUniformLocation
 	private cameraLocation: WebGLUniformLocation
 
+	private readonly instancesCount = 10000
+	private readonly instanceData: number[] = []
+
 	constructor(private renderer: Renderer) {
 		const gl = this.renderer.context
 
@@ -80,16 +83,7 @@ export class Mesh {
 			const instanceBuffer = gl.createBuffer()
 			gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer)
 
-			// prettier-ignore
-			const instanceData = [
-				// Instance 1
-				1.0, 0.0, 0.0,
-				// Instance 2
-				0.0, 1.0, 0.0,
-				// Instance 3
-				0.0, 0.0, 1.0
-			];
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(instanceData), gl.STATIC_DRAW)
+			this.generatePositions()
 
 			const aInstanceDataLocation = gl.getAttribLocation(program, 'aInstanceData')
 			gl.enableVertexAttribArray(aInstanceDataLocation)
@@ -105,6 +99,16 @@ export class Mesh {
 		}
 	}
 
+	private generatePositions() {
+		const gl = this.renderer.context
+		for (let i = 0; i < this.instancesCount; ++i) {
+			const x = (Math.random() - 0.5) * 20
+			const y = (Math.random() - 0.5) * 20
+			this.instanceData.push(...[x, 0.0, y])
+		}
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.instanceData), gl.STATIC_DRAW)
+	}
+
 	public update() {
 		const gl = this.renderer.context
 		const camera = this.renderer.camera
@@ -113,6 +117,6 @@ export class Mesh {
 		}
 		gl.uniformMatrix4fv(this.projectionLocation, false, camera.projectionMatrix)
 		gl.uniformMatrix4fv(this.cameraLocation, false, camera.cameraMatrix)
-		gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0, 3)
+		gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0, this.instancesCount)
 	}
 }

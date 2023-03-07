@@ -11,6 +11,11 @@ export class OrgitControls {
 	private clonePosition: number[] = [0, 0, this.distance]
 	private camera
 
+	private theta: number = Math.PI / 2
+	private phi: number = 0
+
+	private readonly EPSILON = 0.0005
+
 	public constructor(private renderer: Renderer) {
 		this.camera = this.renderer.camera
 		this.handleClick = this.handleClick.bind(this)
@@ -25,6 +30,11 @@ export class OrgitControls {
 		if (!this.camera) {
 			throw 'No camera'
 		}
+		this.clonePosition = [
+			Math.sin(this.theta) * Math.sin(this.phi) * this.distance,
+			Math.cos(this.theta) * this.distance,
+			Math.sin(this.theta) * Math.cos(this.phi) * this.distance,
+		]
 		this.camera.position = this.clonePosition
 	}
 
@@ -37,10 +47,17 @@ export class OrgitControls {
 
 	handleMouseMove(e: MouseEvent) {
 		if (this.leftPressed) {
-			const mousePos = [e.x, e.y]
-			const diffX = this.lastPos[1] - mousePos[0]
-			this.clonePosition = [Math.sin(diffX / 100) * this.distance, 1.0, Math.cos(diffX / 100) * this.distance]
-			// this.lastPos = mousePos
+			const mousePos: MousePosition = [e.x, e.y]
+			const deltaX = this.lastPos[0] - mousePos[0]
+			const deltaY = this.lastPos[1] - mousePos[1]
+			this.phi += deltaX / 100
+			this.theta += deltaY / 100
+			if (this.theta < this.EPSILON) {
+				this.theta = this.EPSILON
+			} else if (this.theta > Math.PI - this.EPSILON) {
+				this.theta = Math.PI - this.EPSILON
+			}
+			this.lastPos = mousePos
 		}
 	}
 
