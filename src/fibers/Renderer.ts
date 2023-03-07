@@ -9,15 +9,13 @@ export class Renderer {
 	public readonly perspCamera: THREE.PerspectiveCamera
 	private width = 10
 	private height = 10
-	private readonly controls: OrbitControls
+	public readonly controls: OrbitControls
 	private readonly renderer: WebGLRenderer
 	private readonly composer: EffectComposer
 	private lightScheme?: LightScheme
-	private callbacks: (() => void)[] = []
 
 	public constructor(private readonly root: HTMLElement) {
 		this.updateSize = this.updateSize.bind(this)
-		this.animate = this.animate.bind(this)
 
 		this.scene = new Scene()
 		const group = new Group()
@@ -52,6 +50,7 @@ export class Renderer {
 			this.controls.target.set(0, 0, 0)
 			this.controls.enableDamping = true
 			this.controls.zoomSpeed = 0.5
+			this.controls.enablePan = false
 		}
 
 		window.addEventListener('resize', this.updateSize)
@@ -75,18 +74,10 @@ export class Renderer {
 		this.renderer.setSize(this.width, this.height)
 	}
 
-	public animate() {
+	public update() {
 		this.controls?.update()
 		this.controls.update()
 		this.composer.render()
 		this.lightScheme?.update()
-		this.callbacks.forEach((callback) => callback())
-		const drawCalls = this.renderer.info.render.calls
-		console.log(`Number of draw calls per frame: ${drawCalls}`)
-		requestAnimationFrame(this.animate)
-	}
-
-	public setCallback(arg: any) {
-		this.callbacks.push(arg)
 	}
 }
