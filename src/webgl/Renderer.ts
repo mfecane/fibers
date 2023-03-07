@@ -1,6 +1,5 @@
 import {Optional} from 'typescript-optional'
-import {fragmentShaderSource, vertexShaderSource} from './Shaders'
-import {mat4} from 'gl-matrix'
+import {fragmentShaderSource, vertexShaderSource} from './shaders'
 import {Camera} from './Camera'
 
 export class Renderer {
@@ -11,15 +10,13 @@ export class Renderer {
 
 	public camera?: Camera
 
-	private projectionLocation: WebGLUniformLocation
-	private cameraLocation: WebGLUniformLocation
-
 	constructor() {
 		this.canvas = document.createElement(`canvas`)
 		document.body.appendChild(this.canvas)
 		this.canvas.id = 'canvas'
 		this.context = Optional.ofNullable(this.canvas.getContext('webgl2')).orElseThrow(() => 'Failed to create context')
 		const gl = this.context
+		gl.enable(gl.DEPTH_TEST)
 
 		const vertShader = Optional.ofNullable(gl.createShader(gl.VERTEX_SHADER)).orElseThrow(
 			() => 'Fail to create vertex shader'

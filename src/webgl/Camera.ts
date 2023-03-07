@@ -6,6 +6,7 @@ export class Camera {
 
 	public cameraMatrix: mat4
 	public projectionMatrix: mat4
+	public far: number = 100
 
 	constructor(private renderer: Renderer) {
 		this.cameraMatrix = mat4.create()
@@ -16,8 +17,7 @@ export class Camera {
 		const fieldOfView = (45 * Math.PI) / 180
 		const aspectRatio = this.renderer.width / this.renderer.height
 		const near = 0.1
-		const far = 100
-		mat4.perspective(this.projectionMatrix, fieldOfView, aspectRatio, near, far)
+		mat4.perspective(this.projectionMatrix, fieldOfView, aspectRatio, near, this.far)
 		const cameraPosition = new Float32Array(this.position)
 		const center = new Float32Array([0, 0, 0])
 		const cameraUp = new Float32Array([0, 1, 0])

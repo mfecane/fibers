@@ -1,10 +1,11 @@
 import {Optional} from 'typescript-optional'
-import {fragmentShaderSource, vertexShaderSource} from './Shaders'
+import {fragmentShaderSource, vertexShaderSource} from './shaders'
 import {Renderer} from './Renderer'
 
 export class Mesh {
 	private projectionLocation: WebGLUniformLocation
 	private cameraLocation: WebGLUniformLocation
+	private logDepthBufFCLocation: WebGLUniformLocation
 
 	private readonly instancesCount = 10000
 	private readonly instanceData: number[] = []
@@ -90,11 +91,17 @@ export class Mesh {
 			gl.vertexAttribPointer(aInstanceDataLocation, 3, gl.FLOAT, false, 0, 0)
 			gl.vertexAttribDivisor(aInstanceDataLocation, 1)
 
+			// gl.depthFunc(func);
+			// gl.depthRange(near, far);
+
 			this.projectionLocation = Optional.ofNullable(gl.getUniformLocation(program, 'projectionMatrix')).orElseThrow(
 				() => 'No location'
 			)
 			this.cameraLocation = Optional.ofNullable(gl.getUniformLocation(program, 'cameraMatrix')).orElseThrow(
 				() => 'No location'
+			)
+			this.logDepthBufFCLocation = Optional.ofNullable(gl.getUniformLocation(program, 'logDepthBufFC')).orElseThrow(
+				() => 'No location logDepthBufFC'
 			)
 		}
 	}
@@ -117,6 +124,7 @@ export class Mesh {
 		}
 		gl.uniformMatrix4fv(this.projectionLocation, false, camera.projectionMatrix)
 		gl.uniformMatrix4fv(this.cameraLocation, false, camera.cameraMatrix)
+		gl.uniform1f(this.logDepthBufFCLocation, 2.0 / (Math.log(camera.far + 1.0) / Math.LN2))
 		gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0, this.instancesCount)
 	}
 }

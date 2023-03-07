@@ -10,11 +10,16 @@ out vec2 vUV;
 
 uniform mat4 projectionMatrix;
 uniform mat4 cameraMatrix;
+uniform float logDepthBufFC;
+
+#define EPSILON 1e-6
 
 void main()	{
     vUV = aTexCoord;
     vec4 rootPosition = projectionMatrix * cameraMatrix * vec4(aInstanceData, 1.0);
     gl_Position = rootPosition + projectionMatrix * vec4(aPosition, 1.0);
+    gl_Position.z = log2(max(EPSILON, gl_Position.w + 1.0)) * logDepthBufFC - 1.0;
+    gl_Position.z *= gl_Position.w;
 }
 `
 
