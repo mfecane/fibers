@@ -1,27 +1,23 @@
 import {Camera} from 'src/webgl/Camera'
-import {Mesh} from 'src/webgl/Mesh'
-import {OrgitControls} from 'src/webgl/OrbitControls'
+import {Raymarch} from 'src/webgl/Raymarch'
 import {Renderer} from 'src/webgl/Renderer'
+import {OrgitControlsRM} from 'src/webgl/OrgitControlsRM'
 
 let renderer: Renderer
-let orbitControls: OrgitControls
 let camera: Camera
-let mesh: Mesh
+let raymarch: Raymarch
+let orbitControls: OrgitControlsRM
 
 export function start() {
 	renderer = new Renderer()
-	camera = new Camera(renderer)
-	renderer.camera = camera
-	orbitControls = new OrgitControls(renderer)
-	mesh = new Mesh(renderer)
+	orbitControls = new OrgitControlsRM(renderer)
+	raymarch = new Raymarch(renderer, orbitControls)
 
 	animate()
 }
 
 function animate() {
-	orbitControls.update()
-	camera.update()
 	renderer.draw()
-	mesh.update()
+	raymarch.update()
 	requestAnimationFrame(animate)
 }
