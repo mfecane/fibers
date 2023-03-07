@@ -11,10 +11,12 @@ export class OrgitControls {
 	private clonePosition: number[] = [0, 0, this.distance]
 	private camera
 
-	private theta: number = Math.PI / 2
+	private theta: number = Math.PI / 4
 	private phi: number = 0
 
 	private readonly EPSILON = 0.0005
+	private minTheta = (2 * Math.PI) / 16
+	private maxTheta = (7 * Math.PI) / 16
 
 	public constructor(private renderer: Renderer) {
 		this.camera = this.renderer.camera
@@ -52,10 +54,10 @@ export class OrgitControls {
 			const deltaY = this.lastPos[1] - mousePos[1]
 			this.phi += deltaX / 100
 			this.theta += deltaY / 100
-			if (this.theta < this.EPSILON) {
-				this.theta = this.EPSILON
-			} else if (this.theta > Math.PI - this.EPSILON) {
-				this.theta = Math.PI - this.EPSILON
+			if (this.theta < this.minTheta) {
+				this.theta = this.minTheta
+			} else if (this.theta > this.maxTheta) {
+				this.theta = this.maxTheta
 			}
 			this.lastPos = mousePos
 		}

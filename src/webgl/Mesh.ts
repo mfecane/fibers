@@ -7,7 +7,7 @@ export class Mesh {
 	private cameraLocation: WebGLUniformLocation
 	private logDepthBufFCLocation: WebGLUniformLocation
 
-	private readonly instancesCount = 10000
+	private readonly instancesCount = 40000
 	private readonly instanceData: number[] = []
 
 	constructor(private renderer: Renderer) {
@@ -57,10 +57,10 @@ export class Mesh {
 			// 20 bytes - 3x4 floats position 2x4 floats uvs
 
 			const positions = [
-				-1, -1, 0, 0, 0,
-				1, -1, 0, 1, 0,
-				1,  1, 0, 1, 1,
-				-1,  1, 0, 0, 1
+				-0.25, 0, 0, 0, 0,
+				0.25, 0, 0, 1, 0,
+				0.25,  0.5, 0, 1, 1,
+				-0.25,  0.5, 0, 0, 1
 			];
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
 
@@ -109,8 +109,8 @@ export class Mesh {
 	private generatePositions() {
 		const gl = this.renderer.context
 		for (let i = 0; i < this.instancesCount; ++i) {
-			const x = (Math.random() - 0.5) * 20
-			const y = (Math.random() - 0.5) * 20
+			const x = (Math.random() - 0.5) * 40
+			const y = (Math.random() - 0.5) * 40
 			this.instanceData.push(...[x, 0.0, y])
 		}
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.instanceData), gl.STATIC_DRAW)
