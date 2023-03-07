@@ -39,6 +39,8 @@ export class Raymarcher {
 				},
 				projectionMatrix: {value: this.camera.projectionMatrix.clone()},
 				cameraWorldMatrix: {value: this.camera.matrixWorld.clone()},
+				cameraWorldMatrixInverse: {value: this.camera.matrixWorldInverse.clone()},
+				cameraProjectionMatrix: {value: this.camera.projectionMatrix.clone()},
 				cameraProjectionMatrixInverse: {value: this.camera.projectionMatrixInverse.clone()},
 				cameraPosition: {value: this.camera.position.clone()},
 			},
@@ -51,12 +53,11 @@ export class Raymarcher {
 	}
 
 	update() {
-		// this.material.uniforms.projectionMatrix.value.copy(this.camera.projectionMatrix)
-		// this.material.uniforms.theta.value = this.renderer.controls.getPolarAngle()
-		// this.material.uniforms.phi.value = this.renderer.controls.getAzimuthalAngle()
-
+		this.material.uniforms.resolution.value = new THREE.Vector2(this.renderer.width, this.renderer.height)
 		this.material.uniforms.cameraWorldMatrix.value = this.camera.matrixWorld.clone()
+		this.material.uniforms.cameraWorldMatrixInverse.value = this.camera.matrixWorldInverse.clone()
 		this.material.uniforms.cameraProjectionMatrixInverse.value = this.camera.projectionMatrixInverse.clone()
 		this.material.uniforms.cameraPosition.value = this.camera.position.clone()
+		this.material.uniforms.cameraProjectionMatrix.value = this.camera.projectionMatrix.clone()
 	}
 }

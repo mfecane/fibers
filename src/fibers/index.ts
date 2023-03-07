@@ -19,8 +19,11 @@ export const exec = () => {
 	const mesh = raymarcher.build()
 	renderer.scene.add(mesh)
 
-	const ah = new THREE.AxesHelper()
-	renderer.scene.add(ah)
+	// const ah = new THREE.AxesHelper()
+	// renderer.scene.add(ah)
+
+	const box = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1))
+	renderer.scene.add(box)
 
 	animate()
 }

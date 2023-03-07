@@ -31,7 +31,7 @@ export class Renderer {
 		{
 			this.perspCamera = new PerspectiveCamera(45, this.width / this.height, 0.1, 1000)
 			this.perspCamera.position.set(0.5, 0.5, 2)
-			this.perspCamera.lookAt(0.5, 0.5, 0)
+			this.perspCamera.lookAt(0, 0, 0)
 		}
 
 		this.updateSize()
@@ -44,9 +44,9 @@ export class Renderer {
 
 		{
 			this.controls = new OrbitControls(this.perspCamera, this.renderer.domElement)
-			this.controls.minDistance = 0.1
-			this.controls.maxDistance = 200
-			this.controls.maxPolarAngle = (7.5 * Math.PI) / 16
+			this.controls.minDistance = 0.5
+			this.controls.maxDistance = 20
+			// this.controls.maxPolarAngle = (7.5 * Math.PI) / 16
 			this.controls.target.set(0, 0, 0)
 			this.controls.enableDamping = true
 			this.controls.zoomSpeed = 0.5

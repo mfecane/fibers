@@ -11,13 +11,15 @@ export const fragmentShaderSource = `#version 300 es
 precision mediump float;
 
 uniform vec2 resolution;
-uniform mat4 viewMatrix;
 uniform vec3 cameraPosition;
 uniform mat4 cameraWorldMatrix;
+uniform mat4 cameraWorldMatrixInverse;
+uniform mat4 cameraProjectionMatrix;
 uniform mat4 cameraProjectionMatrixInverse;
 
 out vec4 FragColor;
 
+#define EPSILON 1e-6
 #define PI  3.14159265358
 #define TAU 6.28318530718
 
@@ -65,25 +67,12 @@ vec3 GetNormal(vec3 p) {
 }
   
 void main()	{
-    vec2 screenPos = (gl_FragCoord.xy * 2.0 - resolution) / resolution;
-
+    vec2 screenPos = (gl_FragCoord.xy / resolution) * 2.0 - 1.0;
     vec4 ndcRay = vec4(screenPos.xy, 1.0, 1.0);
-
-    // convert ray direction from normalized device coordinate to world coordinate
-    vec3 rayDirection = ( cameraWorldMatrix * cameraProjectionMatrixInverse * ndcRay ).xyz;
-    rayDirection = normalize( rayDirection );
-
+    
     vec3 rayOrigin = cameraPosition;
-
-    // vec2 rot = vec2(
-    //     -theta + PI / 2.0,
-    //     -phi
-    // );
-
-    // R(rayDirection.yz, -rot.x);
-    // R(rayDirection.xz, rot.y);
-    // R(rayOrigin.yz, -rot.x);
-    // R(rayOrigin.xz, rot.y);
+    vec3 rayDirection = (cameraWorldMatrix * cameraProjectionMatrixInverse * ndcRay).xyz;
+    rayDirection = normalize( rayDirection );
 
     float d = rayMarch(rayOrigin, rayDirection);
 
@@ -94,9 +83,15 @@ void main()	{
         vec3 n = GetNormal(p);
         float dif = dot(n, normalize(vec3(1.0, 2.0, -3.0))) * 0.5 + 0.5;
         col = vec3(dif) * 0.2;
+
+        // TODO i think i should account for resolution
+        // since the center seem to be offset
+
+        vec4 clipPos = cameraProjectionMatrix * cameraWorldMatrixInverse * vec4(p, 1.0);
+        gl_FragDepth = (clipPos.z / clipPos.w) * 0.5 + 0.5;
     } else {
         discard;
     }
-  
+
     FragColor = vec4(col, 1.0);
 }`
