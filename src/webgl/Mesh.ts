@@ -1,14 +1,17 @@
 import {Optional} from 'typescript-optional'
 import {fragmentShaderSource, vertexShaderSource} from './shaders'
 import {Renderer} from './Renderer'
+import {FiberGenerator} from './FiberGenerator'
 
 export class Mesh {
 	private projectionLocation: WebGLUniformLocation
 	private cameraLocation: WebGLUniformLocation
 	private logDepthBufFCLocation: WebGLUniformLocation
 
-	private readonly instancesCount = 40000
+	private readonly instancesCount = 200000
 	private readonly instanceData: number[] = []
+
+	private elements = 0
 
 	constructor(private renderer: Renderer) {
 		const gl = this.renderer.context
@@ -56,29 +59,23 @@ export class Mesh {
 
 			// 20 bytes - 3x4 floats position 2x4 floats uvs
 
-			const positions = [
-				-0.25, 0, 0, 0, 0,
-				0.25, 0, 0, 1, 0,
-				0.25,  0.5, 0, 1, 1,
-				-0.25,  0.5, 0, 0, 1
-			];
+			const fiberGenerator = new FiberGenerator()
+			const meshdata = fiberGenerator.getBuffer()
+			const positions = meshdata.positions
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
 
 			const indexBuffer = gl.createBuffer()
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
-			// prettier-ignore
-			const indices = [
-				0, 1, 2,
-				2, 3, 0
-			];
+			const indices = meshdata.indices
+			this.elements = meshdata.indices.length
 			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
 
 			const positionAttributeLocation = gl.getAttribLocation(program, 'aPosition')
-			gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 20, 0)
+			gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 16, 0)
 			gl.enableVertexAttribArray(positionAttributeLocation)
 
 			const uvAttributeLocation = gl.getAttribLocation(program, 'aTexCoord')
-			gl.vertexAttribPointer(uvAttributeLocation, 2, gl.FLOAT, false, 20, 12)
+			gl.vertexAttribPointer(uvAttributeLocation, 2, gl.FLOAT, false, 16, 8)
 			gl.enableVertexAttribArray(uvAttributeLocation)
 
 			const instanceBuffer = gl.createBuffer()
@@ -125,6 +122,6 @@ export class Mesh {
 		gl.uniformMatrix4fv(this.projectionLocation, false, camera.projectionMatrix)
 		gl.uniformMatrix4fv(this.cameraLocation, false, camera.cameraMatrix)
 		gl.uniform1f(this.logDepthBufFCLocation, 2.0 / (Math.log(camera.far + 1.0) / Math.LN2))
-		gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0, this.instancesCount)
+		gl.drawElementsInstanced(gl.TRIANGLES, this.elements, gl.UNSIGNED_SHORT, 0, this.instancesCount)
 	}
 }
