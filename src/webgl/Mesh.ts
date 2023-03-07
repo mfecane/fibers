@@ -2,9 +2,40 @@ import {Optional} from 'typescript-optional'
 import {fragmentShaderSource, vertexShaderSource} from './Shaders'
 import {Renderer} from './Renderer'
 
+export class InstanceBuffer {
+	private buffer: Float32Array = new Float32Array()
+	private count: number = 0
+
+	public constructor(private renderer: Renderer, private mesh: Mesh) {
+		const gl = this.renderer.context
+
+		const instanceBuffer = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer)
+	}
+
+	public setData(data: number[]): void {
+		const gl = this.renderer.context
+
+		this.buffer = new Float32Array(data)
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW)
+	}
+
+	public sendData() {
+		const gl = this.renderer.context
+
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.buffer), gl.STATIC_DRAW)
+
+		const aInstanceDataLocation = gl.getAttribLocation(this.mesh.program, 'aInstanceData')
+		gl.enableVertexAttribArray(aInstanceDataLocation)
+		gl.vertexAttribPointer(aInstanceDataLocation, 3, gl.FLOAT, false, 0, 0)
+		gl.vertexAttribDivisor(aInstanceDataLocation, 1)
+	}
+}
+
 export class Mesh {
 	private projectionLocation: WebGLUniformLocation
 	private cameraLocation: WebGLUniformLocation
+	public program: WebGLProgram
 
 	constructor(private renderer: Renderer) {
 		const gl = this.renderer.context
@@ -31,18 +62,18 @@ export class Mesh {
 			console.log(gl.getShaderInfoLog(fragShader))
 		}
 
-		const program = Optional.ofNullable(gl.createProgram()).orElseThrow(() => 'Fail to create program')
-		gl.attachShader(program, vertShader)
-		gl.attachShader(program, fragShader)
-		gl.linkProgram(program)
+		this.program = Optional.ofNullable(gl.createProgram()).orElseThrow(() => 'Fail to create this.program')
+		gl.attachShader(this.program, vertShader)
+		gl.attachShader(this.program, fragShader)
+		gl.linkProgram(this.program)
 
-		gl.validateProgram(program)
-		if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
-			const info = gl.getProgramInfoLog(program)
-			throw 'Error validating program ' + info
+		gl.validateProgram(this.program)
+		if (!gl.getProgramParameter(this.program, gl.VALIDATE_STATUS)) {
+			const info = gl.getProgramInfoLog(this.program)
+			throw 'Error validating this.program ' + info
 		}
 
-		gl.useProgram(program)
+		gl.useProgram(this.program)
 
 		// BUFFERS
 		{
@@ -51,7 +82,6 @@ export class Mesh {
 			// prettier-ignore
 
 			// 20 bytes - 3x4 floats position 2x4 floats uvs
-
 			const positions = [
 				-1, -1, 0, 0, 0,
 				1, -1, 0, 1, 0,
@@ -69,37 +99,30 @@ export class Mesh {
 			];
 			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
 
-			const positionAttributeLocation = gl.getAttribLocation(program, 'aPosition')
+			const positionAttributeLocation = gl.getAttribLocation(this.program, 'aPosition')
 			gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 20, 0)
 			gl.enableVertexAttribArray(positionAttributeLocation)
 
-			const uvAttributeLocation = gl.getAttribLocation(program, 'aTexCoord')
+			const uvAttributeLocation = gl.getAttribLocation(this.program, 'aTexCoord')
 			gl.vertexAttribPointer(uvAttributeLocation, 2, gl.FLOAT, false, 20, 12)
 			gl.enableVertexAttribArray(uvAttributeLocation)
 
-			const instanceBuffer = gl.createBuffer()
-			gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer)
-
+			const instanceBuffer = new InstanceBuffer(this.renderer, this)
 			// prettier-ignore
-			const instanceData = [
+			instanceBuffer.setData([
 				// Instance 1
 				1.0, 0.0, 0.0,
 				// Instance 2
-				0.0, 1.0, 0.0,
+				0.0, 0.0, 1.0,
 				// Instance 3
-				0.0, 0.0, 1.0
-			];
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(instanceData), gl.STATIC_DRAW)
+				2.0, 0.0, 1.0
+			])
+			instanceBuffer.sendData()
 
-			const aInstanceDataLocation = gl.getAttribLocation(program, 'aInstanceData')
-			gl.enableVertexAttribArray(aInstanceDataLocation)
-			gl.vertexAttribPointer(aInstanceDataLocation, 3, gl.FLOAT, false, 0, 0)
-			gl.vertexAttribDivisor(aInstanceDataLocation, 1)
-
-			this.projectionLocation = Optional.ofNullable(gl.getUniformLocation(program, 'projectionMatrix')).orElseThrow(
-				() => 'No location'
-			)
-			this.cameraLocation = Optional.ofNullable(gl.getUniformLocation(program, 'cameraMatrix')).orElseThrow(
+			this.projectionLocation = Optional.ofNullable(
+				gl.getUniformLocation(this.program, 'projectionMatrix')
+			).orElseThrow(() => 'No location')
+			this.cameraLocation = Optional.ofNullable(gl.getUniformLocation(this.program, 'cameraMatrix')).orElseThrow(
 				() => 'No location'
 			)
 		}

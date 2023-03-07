@@ -1,20 +1,19 @@
 const path = require('path')
 
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import {defineConfig} from 'vite'
 
 export default defineConfig({
-  base: '/fibers/',
-  resolve: {
-    alias: {
-      src: path.resolve(__dirname, 'src'),
-      components: path.resolve(__dirname, 'src/components'),
-      styles: path.resolve(__dirname, 'src/styles'),
-      assets: path.resolve(__dirname, 'assets'),
-      css: path.resolve(__dirname, 'src/css'),
-    },
-  },
-  build: {
-    chunkSizeWarningLimit: 10000,
-  },
+	base: '/fibers/',
+	resolve: {
+		alias: {
+			src: path.resolve(__dirname, 'src'),
+			components: path.resolve(__dirname, 'src/components'),
+			styles: path.resolve(__dirname, 'src/styles'),
+			assets: path.resolve(__dirname, 'assets'),
+			css: path.resolve(__dirname, 'src/css'),
+		},
+	},
+	build: {
+		chunkSizeWarningLimit: 10000,
+	},
 })
