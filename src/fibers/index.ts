@@ -1,7 +1,7 @@
-import {Renderer} from 'src/fibers/Renderer'
-import {ThreeLightsLightScheme} from './ThreeLightLightSceme'
+import {Renderer} from '../Renderer/Renderer'
+import {ThreeLightsLightScheme} from '../Renderer/ThreeLightLightSceme'
 import * as THREE from 'three'
-import {Raymarcher} from './Raymarcher'
+import {Raymarcher} from '../Renderer/Raymarcher'
 
 let renderer: Renderer
 let raymarcher: Raymarcher

@@ -189,7 +189,6 @@ uniform mat4 cameraWorldMatrix;
 uniform mat4 cameraWorldMatrixInverse;
 uniform mat4 cameraProjectionMatrix;
 uniform mat4 cameraProjectionMatrixInverse;
-uniform sampler2D textureMap;
 
 out vec4 FragColor;
 
@@ -203,123 +202,39 @@ out vec4 FragColor;
 
 #define R(p, a) p = cos(a) * p + sin(a) * vec2(p.y, -p.x)
 
-const float uvScale = 1.0;
-const float colorUvScale = 0.1;
-const float furDepth = 0.2;
-const int furLayers = 64;
-const float rayStep = furDepth*2.0 / float(furLayers);
-const float furThreshold = 0.4;
-const float shininess = 50.0;
-
 ${funcitons}
 ${simplexNoise}
 ${distances}
 
 float fibers(vec3 p) {
-  vec2 spacing = vec2(0.01);
-  float n = simplex_noise3(p);
-  p += vec3(n * 0.2, 0.0, (n + 0.324324) * 0.2);
-  vec2 halfSpacing = spacing * 0.5;
-  vec2 p1 = mod(p.xz + halfSpacing, spacing) - halfSpacing;
-  return length(p1) - spacing.x / 3.0;
+    vec2 spacing = vec2(0.01);
+    float n = simplex_noise3(p);
+    p += vec3(n * 0.2, 0.0, (n + 0.324324) * 0.2);
+    vec2 halfSpacing = spacing * 0.5;
+    vec2 p1 = mod(p.xz + halfSpacing, spacing) - halfSpacing;
+    return length(p1) - spacing.x / 3.0;
 }
 
 float sceneDistance(vec3 p) {
-  return sdRectangle(p, vec3(1.0, 0.05, 2.0));
+    // float fib = fibers(p);
+    float fib = sdGyroid(p, 10.0, 0.05);
+    float rect = sdRectangle(p, vec3(1.0, 0.05, 2.0));
+    return smin(fib, rect, -0.001);
 }
 
-float furDensity(vec3 pos)
-{
-  vec4 tex = texture(textureMap, pos.xz);
+float rayMarch(vec3 ro, vec3 rd) {
+    float dO = 0.0;
 
-  float density = smoothstep(furThreshold, 1.0, tex.x);
-  
-  float r = pos.y;
-  float t = (r - (1.0 - furDepth)) / furDepth;
-  
-  // fade out along length
-  float len = tex.y;
-  density *= smoothstep(len, len-0.2, t);
-
-  return density;	
-}
-
-// calculate normal from density
-vec3 furNormal(vec3 pos, float density)
-{
-    float eps = 0.01;
-    vec3 n;
-	vec2 uv;
-    n.x = furDensity(vec3(pos.x+eps, pos.y, pos.z)) - density;
-    n.y = furDensity(vec3(pos.x, pos.y+eps, pos.z)) - density;
-    n.z = furDensity(vec3(pos.x, pos.y, pos.z+eps)) - density;
-    return normalize(n);
-}
-
-vec3 furShade(vec3 pos, vec2 uv, vec3 ro, float density)
-{
-	// lighting
-	const vec3 L = vec3(0, 1, 0);
-	vec3 V = normalize(ro - pos);
-	vec3 H = normalize(V + L);
-
-	vec3 N = -furNormal(pos, density);
-	//float diff = max(0.0, dot(N, L));
-	float diff = max(0.0, dot(N, L)*0.5+0.5);
-	float spec = pow(max(0.0, dot(N, H)), shininess);
-	
-	// base color
-	vec3 color = texture(textureMap, pos.xz * colorUvScale).xyz;
-
-	// darken with depth
-	float r = length(pos);
-	float t = (r - (1.0 - furDepth)) / furDepth;
-	t = clamp(t, 0.0, 1.0);
-	float i = t*0.5+0.5;
-		
-	return color*diff*i + vec3(spec*i);
-}	
-
-vec4 rayMarch(vec3 ro, vec3 rd) {
-	vec4 c = vec4(0.0);
-  vec3 p = ro;
-  bool hit = false;
-  float dO = 0.0;
-
-  for (int i = 0; i < MAX_STEPS; i++) {
-    p = ro + rd * dO;
-    float dS = sceneDistance(p);
-    dO += dS;
-    if (dO > MAX_DIST) {
-      hit = false;
-      break;
+    for(int i = 0; i < MAX_STEPS; i++) {
+        vec3 p = ro + rd * dO;
+        float dS = sceneDistance(p);
+        dO += dS;
+        if (dO > MAX_DIST || abs(dS) < SURF_DIST) {
+            break;
+        }
     }
-    if (abs(dS) < SURF_DIST) {
-      hit = true;
-      break;
-    }
-  }
 
-  if (hit) {
-    // ray-march into volume
-    for(int i = 0; i < furLayers; i++) {
-      vec4 sampleCol;
-      vec2 uv;
-      sampleCol.a = furDensity(p);
-      if (sampleCol.a > 0.0) {
-        sampleCol.rgb = furShade(p, uv, ro, sampleCol.a);
-
-        // pre-multiply alpha
-        sampleCol.rgb *= sampleCol.a;
-        c = c + sampleCol * (1.0 - c.a);
-        if (c.a > 0.95) break;
-      }
-      
-      p += rd * rayStep;
-    }
-  }
-	
-	return c;
+    return dO;
 }
 
 vec3 GetNormal(vec3 p) {
@@ -342,19 +257,21 @@ void main()	{
     vec3 rayDirection = (cameraWorldMatrix * cameraProjectionMatrixInverse * ndcRay).xyz;
     rayDirection = normalize(rayDirection);
 
-    FragColor = rayMarch(rayOrigin, rayDirection);
+    float d = rayMarch(rayOrigin, rayDirection);
 
     vec3 col = vec3(0.0, 0.0, 0.0);
 
-    // if(d < MAX_DIST) {
-    //     vec3 p = rayOrigin + rayDirection * d;
-    //     vec3 n = GetNormal(p);
-    //     float dif = dot(n, normalize(vec3(1.0, 2.0, -3.0))) * 0.5 + 0.5;
-    //     col = vec3(dif) * 0.2;
+    if(d < MAX_DIST) {
+        vec3 p = rayOrigin + rayDirection * d;
+        vec3 n = GetNormal(p);
+        float dif = dot(n, normalize(vec3(1.0, 2.0, -3.0))) * 0.5 + 0.5;
+        col = vec3(dif) * 0.2;
 
-    //     vec4 clipPos = cameraProjectionMatrix * cameraWorldMatrixInverse * vec4(p, 1.0);
-    //     gl_FragDepth = (clipPos.z / clipPos.w) * 0.5 + 0.5;
-    // } else {
-    //     discard;
-    // }
+        vec4 clipPos = cameraProjectionMatrix * cameraWorldMatrixInverse * vec4(p, 1.0);
+        gl_FragDepth = (clipPos.z / clipPos.w) * 0.5 + 0.5;
+    } else {
+        discard;
+    }
+
+    FragColor = vec4(col, 1.0);
 }`

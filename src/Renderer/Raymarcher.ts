@@ -1,6 +1,5 @@
-import {Mesh, OrthographicCamera, PerspectiveCamera, PlaneGeometry, RawShaderMaterial} from 'three'
+import {Mesh, PerspectiveCamera, RawShaderMaterial, TextureLoader} from 'three'
 import * as THREE from 'three'
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 import {fragmentShaderSource, vertexShaderSource} from 'src/shaders/raymarcher'
 import {Renderer} from './Renderer'
 
@@ -16,10 +15,10 @@ export class Raymarcher {
 		const bufferGeometry = new THREE.BufferGeometry()
 		// prettier-ignore
 		bufferGeometry.setAttribute('position', new THREE.Float32BufferAttribute([
-			-1, -1, 0,
-			1, -1, 0,
-			-1, 1, 0,
-			1, 1, 0,
+			-1, -1,  0,
+			 1, -1,  0,
+			-1,  1,  0,
+			 1,  1,  0,
 		], 3))
 
 		// prettier-ignore
@@ -28,11 +27,15 @@ export class Raymarcher {
 			2, 3, 1
 		])
 
-		// FUCK THIS SHIT
-		const width = this.renderer.width * window.devicePixelRatio
-		const height = this.renderer.height * window.devicePixelRatio
+		const [width, height] = this.getDimensions()
+
+		const texture = new TextureLoader().load('texture_5.jpg')
+		texture.wrapS = THREE.RepeatWrapping
+		texture.wrapT = THREE.RepeatWrapping
+
 		this.material = new THREE.RawShaderMaterial({
 			uniforms: {
+				textureMap: {value: texture},
 				resolution: {value: new THREE.Vector2(width, height)},
 				theta: {
 					value: this.renderer.controls.getPolarAngle(),
@@ -54,12 +57,14 @@ export class Raymarcher {
 		return mesh
 	}
 
-	update() {
+	private getDimensions(): [width: number, height: number] {
 		// FUCK THIS SHIT
 		const width = this.renderer.width * window.devicePixelRatio
 		const height = this.renderer.height * window.devicePixelRatio
+		return [width, height]
+	}
 
-		this.material.uniforms.resolution.value = new THREE.Vector2(width, height)
+	update() {
 		this.material.uniforms.cameraWorldMatrix.value = this.camera.matrixWorld.clone()
 		this.material.uniforms.cameraWorldMatrixInverse.value = this.camera.matrixWorldInverse.clone()
 		this.material.uniforms.cameraProjectionMatrix.value = this.camera.projectionMatrix.clone()
