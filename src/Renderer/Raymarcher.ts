@@ -29,7 +29,7 @@ export class Raymarcher {
 
 		const [width, height] = this.getDimensions()
 
-		const texture = new TextureLoader().load('texture_5.jpg')
+		const texture = new TextureLoader().load('noise.png')
 		texture.wrapS = THREE.RepeatWrapping
 		texture.wrapT = THREE.RepeatWrapping
 

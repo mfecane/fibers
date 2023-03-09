@@ -203,7 +203,7 @@ out vec4 FragColor;
 
 #define R(p, a) p = cos(a) * p + sin(a) * vec2(p.y, -p.x)
 
-const float uvScale = 1.0;
+const float uvScale = 2.0;
 const float colorUvScale = 0.1;
 const float furDepth = 0.2;
 const int furLayers = 64;
@@ -215,22 +215,13 @@ ${funcitons}
 ${simplexNoise}
 ${distances}
 
-float fibers(vec3 p) {
-  vec2 spacing = vec2(0.01);
-  float n = simplex_noise3(p);
-  p += vec3(n * 0.2, 0.0, (n + 0.324324) * 0.2);
-  vec2 halfSpacing = spacing * 0.5;
-  vec2 p1 = mod(p.xz + halfSpacing, spacing) - halfSpacing;
-  return length(p1) - spacing.x / 3.0;
-}
-
 float sceneDistance(vec3 p) {
-  return sdRectangle(p, vec3(1.0, 0.05, 2.0));
+  return sdRectangle(p, vec3(1.0, 0.2, 2.0));
 }
 
 float furDensity(vec3 pos)
 {
-  vec4 tex = texture(textureMap, pos.xz);
+  vec4 tex = texture(textureMap, pos.xz * uvScale);
 
   float density = smoothstep(furThreshold, 1.0, tex.x);
   
@@ -258,26 +249,8 @@ vec3 furNormal(vec3 pos, float density)
 
 vec3 furShade(vec3 pos, vec2 uv, vec3 ro, float density)
 {
-	// lighting
-	const vec3 L = vec3(0, 1, 0);
-	vec3 V = normalize(ro - pos);
-	vec3 H = normalize(V + L);
-
-	vec3 N = -furNormal(pos, density);
-	//float diff = max(0.0, dot(N, L));
-	float diff = max(0.0, dot(N, L)*0.5+0.5);
-	float spec = pow(max(0.0, dot(N, H)), shininess);
-	
-	// base color
 	vec3 color = texture(textureMap, pos.xz * colorUvScale).xyz;
-
-	// darken with depth
-	float r = length(pos);
-	float t = (r - (1.0 - furDepth)) / furDepth;
-	t = clamp(t, 0.0, 1.0);
-	float i = t*0.5+0.5;
-		
-	return color*diff*i + vec3(spec*i);
+	return color;
 }	
 
 vec4 rayMarch(vec3 ro, vec3 rd) {
