@@ -22,6 +22,16 @@ export const exec = () => {
 	const ah = new THREE.AxesHelper()
 	renderer.scene.add(ah)
 
+	// box for reference
+	const box = new THREE.Mesh(
+		new THREE.BoxGeometry(2.0, 0.2, 4.0),
+		new THREE.MeshStandardMaterial({
+			color: 0x333333,
+		})
+	)
+	box.position.y = -0.3
+	renderer.scene.add(box)
+
 	animate()
 }
 

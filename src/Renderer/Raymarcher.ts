@@ -52,6 +52,7 @@ export class Raymarcher {
 			vertexShader: vertexShaderSource,
 			fragmentShader: fragmentShaderSource,
 			side: THREE.DoubleSide,
+			transparent: true,
 		})
 		const mesh = new Mesh(bufferGeometry, this.material)
 		return mesh

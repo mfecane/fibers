@@ -205,10 +205,9 @@ out vec4 FragColor;
 
 const float uvScale = 2.0;
 const float colorUvScale = 0.1;
-const float furDepth = 0.2;
+const float furDepth = 0.1;
 const int furLayers = 64;
-const float rayStep = furDepth*2.0 / float(furLayers);
-const float furThreshold = 0.4;
+const float rayStep = 0.1 / float(furLayers);
 const float shininess = 50.0;
 
 ${funcitons}
@@ -223,14 +222,21 @@ float furDensity(vec3 pos)
 {
   vec4 tex = texture(textureMap, pos.xz * uvScale);
 
+  float furThreshold = 0.6;
   float density = smoothstep(furThreshold, 1.0, tex.x);
-  
-  float r = pos.y;
-  float t = (r - (1.0 - furDepth)) / furDepth;
+  density *= 0.05;
+
+  // float r = pos.y;
+  float t = (pos.y - (1.0 - furDepth)) / furDepth;
   
   // fade out along length
   float len = tex.y;
-  density *= smoothstep(len, len-0.2, t);
+  // density *= smoothstep(len, len - 1.0, t);
+
+  // y from -0.1 to 0.1
+  //
+  // density *= smoothstep(0.1, -0.1, pos.y); 
+
 
   return density;	
 }
@@ -247,18 +253,17 @@ vec3 furNormal(vec3 pos, float density)
     return normalize(n);
 }
 
-vec3 furShade(vec3 pos, vec2 uv, vec3 ro, float density)
+vec3 furShade(vec3 pos)
 {
 	vec3 color = texture(textureMap, pos.xz * colorUvScale).xyz;
 	return color;
 }	
 
-vec4 rayMarch(vec3 ro, vec3 rd) {
-	vec4 c = vec4(0.0);
+vec4 rayMarch(vec3 ro, vec3 rd, out float dO) {
+	vec4 c = vec4(0.0, 0.0, 0.0, 0.0);
   vec3 p = ro;
   bool hit = false;
-  float dO = 0.0;
-
+  // ray march box
   for (int i = 0; i < MAX_STEPS; i++) {
     p = ro + rd * dO;
     float dS = sceneDistance(p);
@@ -272,26 +277,40 @@ vec4 rayMarch(vec3 ro, vec3 rd) {
       break;
     }
   }
-
+  // we hit our box
   if (hit) {
+    // purpusefully step inside
+    p *= 0.99; 
     // ray-march into volume
-    for(int i = 0; i < furLayers; i++) {
+    for(int i = 0; i < 128; i++) {
       vec4 sampleCol;
-      vec2 uv;
+      // set alpha to density
       sampleCol.a = furDensity(p);
       if (sampleCol.a > 0.0) {
-        sampleCol.rgb = furShade(p, uv, ro, sampleCol.a);
-
+        // get the color we want
+        sampleCol.rgb = vec3(0.0, 0.0, 0.0);
         // pre-multiply alpha
         sampleCol.rgb *= sampleCol.a;
+        // build up color;
         c = c + sampleCol * (1.0 - c.a);
-        if (c.a > 0.95) break;
+        // if we built up enough color;
+        if (c.a > 0.95) {
+          // debug: check if we built up enough color
+          c = vec4(0.0, 1.0, 0.0, 1.0);
+          break;
+        }
       }
-      
+      // if we outide object
+      if (sceneDistance(p) > 0.0) {
+        break;
+      }
+      // next step
+      // todo make const
+      float rayStep = 0.5 / float(furLayers);
       p += rd * rayStep;
     }
   }
-	
+  
 	return c;
 }
 
@@ -315,9 +334,13 @@ void main()	{
     vec3 rayDirection = (cameraWorldMatrix * cameraProjectionMatrixInverse * ndcRay).xyz;
     rayDirection = normalize(rayDirection);
 
-    FragColor = rayMarch(rayOrigin, rayDirection);
+    float dO = 0.0;
+    FragColor = rayMarch(rayOrigin, rayDirection, dO);
+    if (dO > MAX_DIST) {
+      discard;
+    }
 
-    vec3 col = vec3(0.0, 0.0, 0.0);
+    // vec3 col = vec3(0.0, 0.0, 0.0);
 
     // if(d < MAX_DIST) {
     //     vec3 p = rayOrigin + rayDirection * d;
