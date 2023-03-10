@@ -1,0 +1,16 @@
+body {
+	font-family: Montserrat;
+}
+
+.btn {
+	min-width: 120px;
+	padding: 10px 20px;
+	font-weight: bold;
+	background-color: rgb(215, 221, 229);
+	color: rgb(30, 71, 124);
+	border-radius: 3px;
+}
+
+.btn:hover {
+	background-color: rgb(218, 236, 238);
+}

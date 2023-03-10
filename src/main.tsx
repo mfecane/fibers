@@ -1,5 +1,9 @@
 import 'src/styles/null.scss'
 import 'src/styles/styles.scss'
-import {exec} from './cards'
+import React from 'react'
 
-exec()
+import {createRoot} from 'react-dom/client'
+import App from './ui/components/App'
+
+const root = createRoot(document.querySelector('#app') as HTMLDivElement)
+root.render(<App />)

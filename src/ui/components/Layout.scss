@@ -1,0 +1,12 @@
+.layout {
+	display: flex;
+	min-height: 100vh;
+}
+
+.layout__left {
+	flex: 0 0 200px;
+}
+
+.layout__canvas-container {
+	flex: 1 0 auto;
+}
