@@ -203,7 +203,7 @@ out vec4 FragColor;
 
 #define R(p, a) p = cos(a) * p + sin(a) * vec2(p.y, -p.x)
 
-const float uvScale = 2.0;
+const float uvScale = 1.0;
 const float colorUvScale = 0.1;
 const float furDepth = 0.1;
 const int furLayers = 64;
@@ -215,14 +215,16 @@ ${simplexNoise}
 ${distances}
 
 float sceneDistance(vec3 p) {
-  return sdRectangle(p, vec3(1.0, 0.2, 2.0));
+  return sdRectangle(p, vec3(2.0, 0.2, 2.0));
 }
 
 float furDensity(vec3 pos)
 {
+  float noise = simplex_noise3(pos) * smoothstep(-0.2, 0.2, pos.y) * 0.002;
+  pos = vec3(pos.x + noise, pos.y, pos.z + fract(noise * 100.0));
   vec4 tex = texture(textureMap, pos.xz * uvScale);
 	// thin out hair
-	float density = smoothstep(0.4, 1.0, tex.x) * 0.2;
+	float density = smoothstep(0.4, 1.0, tex.x);
 	
   float furDepth = 0.4;
   float radius = 0.1;
@@ -230,7 +232,7 @@ float furDensity(vec3 pos)
 	
 	// fade out along length
 	float len = tex.y;
-	density *= smoothstep(len, len-0.2, t);
+	density *= smoothstep(len, len - 0.2, t);
 
   return density;	
 }
@@ -240,17 +242,39 @@ vec3 furNormal(vec3 pos, float density)
 {
     float eps = 0.01;
     vec3 n;
-	vec2 uv;
-    n.x = furDensity(vec3(pos.x+eps, pos.y, pos.z)) - density;
-    n.y = furDensity(vec3(pos.x, pos.y+eps, pos.z)) - density;
-    n.z = furDensity(vec3(pos.x, pos.y, pos.z+eps)) - density;
+    n.x = furDensity(vec3(pos.x + eps, pos.y, pos.z)) - density;
+    n.y = furDensity(vec3(pos.x, pos.y + eps, pos.z)) - density;
+    n.z = furDensity(vec3(pos.x, pos.y, pos.z + eps)) - density;
     return normalize(n);
 }
 
-vec3 furShade(vec3 pos)
+vec3 furShade1(vec3 pos)
 {
 	vec3 color = texture(textureMap, pos.xz * colorUvScale).xyz;
 	return color;
+}	
+
+vec3 furShade(vec3 pos, vec3 ro, float density)
+{
+	// lighting
+	const vec3 L = vec3(0, 1, 0);
+	vec3 V = normalize(ro - pos);
+	vec3 H = normalize(V + L);
+
+	vec3 N = -furNormal(pos, density);
+	//float diff = max(0.0, dot(N, L));
+	float diff = max(0.0, dot(N, L) * 0.5 + 0.5);
+	float spec = pow(max(0.0, dot(N, H)), shininess);
+	
+	// base color
+	vec3 color = texture(textureMap, pos.xz * colorUvScale, 0.0).xyz;
+
+	// darken with depth
+	float t = (pos.y - (1.0 - furDepth)) / furDepth;
+	t = clamp(t, 0.0, 1.0);
+	float i = t * 0.5+0.5;
+		
+	return color * diff * i + vec3(spec * i);
 }	
 
 vec4 rayMarch(vec3 ro, vec3 rd, out float dO) {
@@ -276,13 +300,13 @@ vec4 rayMarch(vec3 ro, vec3 rd, out float dO) {
     // purpusefully step inside
     p *= 0.99; 
     // ray-march into volume
-    for(int i = 0; i < 128; i++) {
+    for(int i = 0; i < 256; i++) {
       vec4 sampleCol;
       // set alpha to density
       sampleCol.a = furDensity(p);
       if (sampleCol.a > 0.0) {
         // get the color we want
-        sampleCol.rgb = vec3(0.0, 0.0, 0.0);
+        sampleCol.rgb = furShade(p, ro, sampleCol.a);
         // pre-multiply alpha
         sampleCol.rgb *= sampleCol.a;
         // build up color;
@@ -300,7 +324,10 @@ vec4 rayMarch(vec3 ro, vec3 rd, out float dO) {
       }
       // next step
       // todo make const
-      float rayStep = 0.02;
+      float rayStep = 0.005;
+      if(sampleCol.a < 0.3 || sampleCol.a > 0.6) {
+        rayStep = 0.02;
+      }
       p += rd * rayStep;
     }
   }

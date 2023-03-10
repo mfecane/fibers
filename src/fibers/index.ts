@@ -24,7 +24,7 @@ export const exec = () => {
 
 	// box for reference
 	const box = new THREE.Mesh(
-		new THREE.BoxGeometry(2.0, 0.2, 4.0),
+		new THREE.BoxGeometry(4.0, 0.2, 4.0),
 		new THREE.MeshStandardMaterial({
 			color: 0x111111,
 		})
