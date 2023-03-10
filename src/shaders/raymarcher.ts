@@ -220,7 +220,7 @@ float sceneDistance(vec3 p) {
 
 float furDensity(vec3 pos)
 {
-  float noise = simplex_noise3(pos) * smoothstep(-0.2, 0.2, pos.y) * 0.002;
+  float noise = pbm_simplex_noise3_q(pos, 0.5) * smoothstep(-0.2, 0.2, pos.y) * 0.002;
   pos = vec3(pos.x + noise, pos.y, pos.z + fract(noise * 100.0));
   vec4 tex = texture(textureMap, pos.xz * uvScale);
 	// thin out hair
