@@ -1,7 +1,7 @@
 import {Mesh, PerspectiveCamera, RawShaderMaterial, TextureLoader} from 'three'
 import * as THREE from 'three'
 import {fragmentShaderSource, vertexShaderSource} from 'src/shaders/raymarcher'
-import {Renderer} from './Renderer'
+import {Renderer} from '../three/Renderer'
 
 export class Raymarcher {
 	private material: RawShaderMaterial = new RawShaderMaterial()

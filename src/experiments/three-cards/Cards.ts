@@ -1,7 +1,7 @@
 import {IRenderer} from 'src/ui/data/RendererFactory'
 import * as THREE from 'three'
-import {Renderer} from '../Renderer/Renderer'
-import {Instanced} from 'src/Renderer/Instanced'
+import {Instanced} from 'src/experiments/three-cards/Instanced'
+import {Renderer} from 'src/three/Renderer'
 
 export class Cards implements IRenderer {
 	animationId: number = -1

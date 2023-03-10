@@ -1,6 +1,6 @@
 import {DirectionalLight, Scene} from 'three'
 import {LightScheme} from './LightScheme'
-import {Renderer} from './Renderer'
+import {Renderer} from '../three/Renderer'
 import * as THREE from 'three'
 
 export class ThreeLightsLightScheme implements LightScheme {

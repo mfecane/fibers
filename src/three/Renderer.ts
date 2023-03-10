@@ -3,7 +3,7 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass.js'
 import * as THREE from 'three'
 import {Group, PerspectiveCamera, Scene, WebGLRenderer} from 'three'
-import {LightScheme} from './LightScheme'
+import {LightScheme} from '../Renderer/LightScheme'
 
 export class Renderer {
 	public readonly scene: THREE.Scene

@@ -1,4 +1,4 @@
-import {Cards} from 'src/cards/Cards'
+import {Cards} from 'src/experiments/three-cards/Cards'
 import {Optional} from 'typescript-optional'
 import {Renderers} from './registry'
 

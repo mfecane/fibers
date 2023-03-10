@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import {fragmentShaderSource, vertexShaderSource} from 'src/shaders/instance'
-import {Renderer} from './Renderer'
+import {Renderer} from '../../three/Renderer'
 import {PerspectiveCamera, RawShaderMaterial} from 'three'
 
 export type OriginPoint = [x: number, y: number]
