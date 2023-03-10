@@ -221,22 +221,16 @@ float sceneDistance(vec3 p) {
 float furDensity(vec3 pos)
 {
   vec4 tex = texture(textureMap, pos.xz * uvScale);
-
-  float furThreshold = 0.6;
-  float density = smoothstep(furThreshold, 1.0, tex.x);
-  density *= 0.05;
-
-  // float r = pos.y;
-  float t = (pos.y - (1.0 - furDepth)) / furDepth;
-  
-  // fade out along length
-  float len = tex.y;
-  // density *= smoothstep(len, len - 1.0, t);
-
-  // y from -0.1 to 0.1
-  //
-  // density *= smoothstep(0.1, -0.1, pos.y); 
-
+	// thin out hair
+	float density = smoothstep(0.4, 1.0, tex.x) * 0.2;
+	
+  float furDepth = 0.4;
+  float radius = 0.1;
+	float t = (pos.y - (radius - furDepth)) / furDepth;
+	
+	// fade out along length
+	float len = tex.y;
+	density *= smoothstep(len, len-0.2, t);
 
   return density;	
 }
@@ -296,7 +290,7 @@ vec4 rayMarch(vec3 ro, vec3 rd, out float dO) {
         // if we built up enough color;
         if (c.a > 0.95) {
           // debug: check if we built up enough color
-          c = vec4(0.0, 1.0, 0.0, 1.0);
+          // c = vec4(0.0, 1.0, 0.0, 1.0);
           break;
         }
       }
@@ -306,7 +300,7 @@ vec4 rayMarch(vec3 ro, vec3 rd, out float dO) {
       }
       // next step
       // todo make const
-      float rayStep = 0.5 / float(furLayers);
+      float rayStep = 0.02;
       p += rd * rayStep;
     }
   }

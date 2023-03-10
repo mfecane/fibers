@@ -1,28 +1,38 @@
 import {DirectionalLight, Scene} from 'three'
 import {LightScheme} from './LightScheme'
 import {Renderer} from './Renderer'
+import * as THREE from 'three'
 
 export class ThreeLightsLightScheme implements LightScheme {
 	private directionalLight?: DirectionalLight
 
 	public constructor(private readonly renderer: Renderer) {
-		this.directionalLight = new DirectionalLight(0xffffff, 0.8)
-		this.directionalLight.position.set(1, 2, 1)
-		this.renderer.scene.add(this.directionalLight.target)
-		this.directionalLight.target.position.set(0, 0, 0)
-		this.renderer.scene.add(this.directionalLight)
+		// this.directionalLight = new DirectionalLight(0xffffff, 0.8)
+		// this.directionalLight.position.set(1, 2, 1)
+		// this.renderer.scene.add(this.directionalLight.target)
+		// this.directionalLight.target.position.set(0, 0, 0)
+		// this.renderer.scene.add(this.directionalLight)
 
-		const directionalLight2 = new DirectionalLight(0xffffff, 0.6)
-		directionalLight2.position.set(-1, 2, -0.5)
-		this.renderer.scene.add(directionalLight2.target)
-		directionalLight2.target.position.set(0, 0, 0)
-		this.renderer.scene.add(directionalLight2)
+		// const directionalLight2 = new DirectionalLight(0xffffff, 0.6)
+		// directionalLight2.position.set(-1, 2, -0.5)
+		// this.renderer.scene.add(directionalLight2.target)
+		// directionalLight2.target.position.set(0, 0, 0)
+		// this.renderer.scene.add(directionalLight2)
 
-		const directionalLight3 = new DirectionalLight(0xffffff, 0.6)
-		directionalLight3.position.set(0.5, 2, -0.5)
-		this.renderer.scene.add(directionalLight3.target)
-		directionalLight3.target.position.set(0, 0, 0)
-		this.renderer.scene.add(directionalLight3)
+		// const directionalLight3 = new DirectionalLight(0xffffff, 0.6)
+		// directionalLight3.position.set(0.5, 2, -0.5)
+		// this.renderer.scene.add(directionalLight3.target)
+		// directionalLight3.target.position.set(0, 0, 0)
+		// this.renderer.scene.add(directionalLight3)
+
+		// const directionalLight3 = new DirectionalLight(0xffffff, 0.6)
+		// directionalLight3.position.set(0.5, 2, -0.5)
+		// this.renderer.scene.add(directionalLight3.target)
+		// directionalLight3.target.position.set(0, 0, 0)
+		// this.renderer.scene.add(directionalLight3)
+
+		const light = new THREE.AmbientLight(0x404040)
+		this.renderer.scene.add(light)
 		this.renderer.addLightScheme(this)
 	}
 
