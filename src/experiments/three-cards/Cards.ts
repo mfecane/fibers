@@ -33,7 +33,7 @@ export class Cards implements IRenderer {
 				color: 0x111111,
 			})
 		)
-		box.position.y = -0.1
+		box.position.y = -0.15
 		this.renderer.scene.add(box)
 
 		this.animate()

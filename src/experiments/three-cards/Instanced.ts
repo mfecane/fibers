@@ -3,10 +3,10 @@ import {fragmentShaderSource, vertexShaderSource} from 'src/shaders/instance'
 import {Renderer} from '../../three/Renderer'
 import {PerspectiveCamera, RawShaderMaterial} from 'three'
 
-export type OriginPoint = [x: number, y: number]
+export type OriginPoint = [x: number, y: number, angle: number]
 
 export class Instanced {
-	private count = 1000
+	private count = 0
 	private material: RawShaderMaterial = new RawShaderMaterial()
 	private camera: PerspectiveCamera
 
@@ -19,12 +19,16 @@ export class Instanced {
 		const maxx = 2
 		const miny = -2
 		const maxy = 2
-		const step = 0.2
+		const step = 0.05
 
 		const origins: OriginPoint[] = []
 		for (let x = minx; x < maxx; x += step) {
 			for (let y = miny; y < maxy; y += step) {
-				origins.push([x, y])
+				origins.push([
+					x + (Math.random() - 0.5) * step,
+					y + (Math.random() - 0.5) * step,
+					Math.random() * Math.PI * 2,
+				])
 			}
 		}
 		this.count = origins.length
@@ -35,7 +39,7 @@ export class Instanced {
 		const matrix = new THREE.Matrix4()
 		const origins = this.makePositions()
 		const count = origins.length
-		const geometry = new THREE.PlaneGeometry(0.1, 0.1)
+		const geometry = new THREE.PlaneGeometry(0.1, 0.2)
 		const [width, height] = this.getDimensions()
 		this.material = new THREE.RawShaderMaterial({
 			uniforms: {
@@ -53,7 +57,16 @@ export class Instanced {
 		})
 		const mesh = new THREE.InstancedMesh(geometry, this.material, count)
 		for (let i = 0; i < count; i++) {
-			matrix.setPosition(new THREE.Vector3(origins[i][0], 0, origins[i][1]))
+			const x = origins[i][0]
+			const z = origins[i][1]
+			const theta = origins[i][2]
+			// prettier-ignore
+			matrix.set(
+				Math.cos(theta),   0,   Math.sin(theta),    -x,
+				0,            	   1,   0,                   0,
+				-Math.sin(theta),  0,   Math.cos(theta),    -z,
+				0,                 0,   0,                   1
+			)
 			mesh.setMatrixAt(i, matrix)
 		}
 		this.renderer.scene.add(mesh)
