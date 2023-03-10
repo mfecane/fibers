@@ -17,3 +17,17 @@ The ray marching process is typically implemented using a loop in a shader progr
 Once the loop has terminated, the accumulated density value is used to compute the color of the pixel, using a transfer function that maps density values to colors. The transfer function can be defined in various ways, depending on the desired appearance and lighting model.
 
 Overall, ray marching with density functions allows for flexible and expressive rendering of complex volumetric objects, such as clouds, smoke, and other natural phenomena, as well as artistic and stylized effects. However, it can be computationally intensive and requires careful tuning of parameters to achieve good performance and visual quality.
+
+# Shader
+
+vertex shader projection
+        gl*Position = cameraProjectionMatrix * cameraWorldMatrixInverse \_ vec4(position, 1.0);
+
+TODO chec why this markdown is formatted
+
+for instanced rendering
+int instanceIndex = gl_InstanceID;
+
+# Three
+
+const instancePosition = new THREE.InstancedBufferAttribute(new Float32Array(positions), 3);

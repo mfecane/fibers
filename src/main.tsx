@@ -1,5 +1,5 @@
 import 'src/styles/null.scss'
 import 'src/styles/styles.scss'
-import {exec} from './fibers'
+import {exec} from './cards'
 
 exec()
