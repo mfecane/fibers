@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import {fragmentShaderSource, vertexShaderSource} from 'src/shaders/instance'
 import {Renderer} from '../../three/Renderer'
 import {PerspectiveCamera, RawShaderMaterial} from 'three'
+import {FiberGenerator} from './FiberGenerator'
 
 export type OriginPoint = [x: number, y: number, angle: number]
 
@@ -39,7 +40,10 @@ export class Instanced {
 		const matrix = new THREE.Matrix4()
 		const origins = this.makePositions()
 		const count = origins.length
-		const geometry = new THREE.PlaneGeometry(0.1, 0.2)
+
+		const builder = new FiberGenerator()
+		const geometry = builder.build()
+
 		const [width, height] = this.getDimensions()
 		this.material = new THREE.RawShaderMaterial({
 			uniforms: {
