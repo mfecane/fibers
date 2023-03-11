@@ -13,7 +13,7 @@ export class FiberGeometry {
 
 	private fiberSize = 0.1
 	private fiberLength = 0.04
-	private curvature = 0.05
+	private curvature = 0.02
 	private density = 8
 
 	public segments = 4

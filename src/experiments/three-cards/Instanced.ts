@@ -39,7 +39,9 @@ export class Instanced {
 			side: THREE.DoubleSide,
 			transparent: true,
 			alphaTest: 0.95,
+			blendEquation: THREE.MaxEquation,
 		})
+		// TODO seems like something is wrong with sorting
 		const mesh = new THREE.Mesh(geometry, this.material)
 
 		this.renderer.scene.add(mesh)
