@@ -11,7 +11,7 @@ export class Renderer {
 	public width = 10
 	public height = 10
 	public readonly controls: OrbitControls
-	private readonly renderer: WebGLRenderer
+	public readonly renderer: WebGLRenderer
 	private readonly composer: EffectComposer
 	private lightScheme?: LightScheme
 

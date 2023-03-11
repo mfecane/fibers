@@ -44,6 +44,7 @@ export class Instanced {
 			depthWrite: false,
 			depthTest: true,
 		})
+
 		// TODO seems like something is wrong with sorting
 		const mesh = new THREE.Mesh(geometry, this.material)
 

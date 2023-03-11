@@ -55,7 +55,19 @@ export const StoreProvider: React.FC<IStoreProviderProps> = ({children}) => {
 	}
 
 	useEffect(() => {
+		const idString = localStorage.getItem('rendererId')
+		if (!idString) {
+			return
+		}
+		const id = +idString as Renderers
+		if (!isNaN(id) && id >= 0 && id < context.renderersList.length) {
+			dispatch({type: 'setRenderer', payload: id})
+		}
+	}, [])
+
+	useEffect(() => {
 		try {
+			localStorage.setItem('rendererId', '' + state.rendererId)
 			rendererFactory.createRenderer(state.rendererId)
 		} catch (error) {
 			console.error(error)

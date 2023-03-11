@@ -1,4 +1,5 @@
 import {Cards} from 'src/experiments/three-cards/Cards'
+import {StandardCards} from 'src/experiments/three-standard-cards/StandardCards'
 import {Optional} from 'typescript-optional'
 import {Renderers} from './registry'
 
@@ -17,6 +18,9 @@ export class RendererFactory {
 		switch (rendererId) {
 			case Renderers.Cards:
 				this.renderer = new Cards()
+				break
+			case Renderers.StandardCards:
+				this.renderer = new StandardCards()
 				break
 		}
 		const element = this.renderer?.create()
