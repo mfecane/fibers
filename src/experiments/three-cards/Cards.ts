@@ -2,7 +2,6 @@ import {IRenderer} from 'src/ui/data/RendererFactory'
 import * as THREE from 'three'
 import {Instanced} from 'src/experiments/three-cards/Instanced'
 import {Renderer} from 'src/three/Renderer'
-import {FiberGenerator} from './FiberGenerator'
 
 export class Cards implements IRenderer {
 	animationId: number = -1
