@@ -11,12 +11,12 @@ export class FiberGeometry {
 
 	private size = 3.95
 
-	private fiberSize = 0.1
-	private fiberLength = 0.04
-	private curvature = 0.02
-	private density = 8
+	private fiberSize = 0.05
+	private fiberLength = 0.08
+	private curvature = 0.1
+	private density = 5
 
-	public segments = 4
+	public segments = 5
 
 	constructor() {
 		const width = this.getWidth(0)
@@ -31,6 +31,31 @@ export class FiberGeometry {
 		for (let i = 1; i < this.segments; ++i) {
 			this.addlayer(i)
 		}
+	}
+
+	private addlayer(segment: number) {
+		const start = this.positions.length
+		const y = (this.fiberLength / this.segments) * segment
+		const v = segment / (this.segments - 1)
+		const width = this.getWidth(segment)
+		this.positions.push(
+			...[
+				[-width / 2, y],
+				[width / 2, y],
+			]
+		)
+		this.uvs.push(
+			...[
+				[0, v],
+				[1, v],
+			]
+		)
+		this.indices.push(
+			...[
+				[start - 2, start - 1, start],
+				[start, start - 1, start + 1],
+			]
+		)
 	}
 
 	private makeOrigins() {
@@ -102,7 +127,8 @@ export class FiberGeometry {
 			const translation = new THREE.Vector3(x, 0, z)
 			matrix.setPosition(translation)
 
-			const scale = new THREE.Vector3(Math.random() > 0.5 ? -1 : 1, 1 + Math.random() * 0.5, 1)
+			const scale = new THREE.Vector3(1, 1 + Math.random() * 0.5, 1)
+			// x: Math.random() > 0.5 ? -1 : 1
 			matrix.scale(scale)
 
 			matrix.toArray(matrixArray, i * 16)
@@ -119,31 +145,6 @@ export class FiberGeometry {
 		// ? i can generate array of positions and submit index as instanced attribute this selecting positions with index?
 
 		return bufferGeometry
-	}
-
-	private addlayer(segment: number) {
-		const start = this.positions.length
-		const y = (this.fiberLength / this.segments) * segment
-		const v = segment / (this.segments - 1)
-		const width = this.getWidth(segment)
-		this.positions.push(
-			...[
-				[-width / 2, y],
-				[width / 2, y],
-			]
-		)
-		this.uvs.push(
-			...[
-				[0, v],
-				[1, v],
-			]
-		)
-		this.indices.push(
-			...[
-				[start - 2, start - 1, start],
-				[start, start + 1, start - 1],
-			]
-		)
 	}
 
 	public getBuffer() {

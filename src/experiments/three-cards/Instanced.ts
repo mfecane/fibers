@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import {fragmentShaderSource, vertexShaderSource} from 'src/shaders/instance'
+import {fragmentShaderSource, vertexShaderSource} from './shaders/instance'
 import {Renderer} from '../../three/Renderer'
 import {PerspectiveCamera, RawShaderMaterial, TextureLoader} from 'three'
 import {FiberGeometry} from './FiberGeometry'
@@ -19,7 +19,7 @@ export class Instanced {
 		const [width, height] = this.getDimensions()
 
 		const textureLoader = new TextureLoader()
-		const texture = textureLoader.load('FurFinHeight.png')
+		const texture = textureLoader.load('FurFin.png')
 		texture.premultiplyAlpha = true
 		const texture2 = textureLoader.load('FurLeopard.jpg')
 
@@ -33,13 +33,16 @@ export class Instanced {
 				cameraProjectionMatrix: {value: this.camera.projectionMatrix.clone()},
 				cameraProjectionMatrixInverse: {value: this.camera.projectionMatrixInverse.clone()},
 				cameraPosition: {value: this.camera.position.clone()},
+				logDepthBufFC: {value: 0},
 			},
 			vertexShader: vertexShaderSource,
 			fragmentShader: fragmentShaderSource,
 			side: THREE.DoubleSide,
 			transparent: true,
 			alphaTest: 0.95,
-			blendEquation: THREE.MaxEquation,
+			blendEquation: THREE.AddEquation,
+			depthWrite: false,
+			depthTest: true,
 		})
 		// TODO seems like something is wrong with sorting
 		const mesh = new THREE.Mesh(geometry, this.material)
@@ -60,5 +63,6 @@ export class Instanced {
 		this.material.uniforms.cameraProjectionMatrix.value = this.camera.projectionMatrix.clone()
 		this.material.uniforms.cameraProjectionMatrixInverse.value = this.camera.projectionMatrixInverse.clone()
 		this.material.uniforms.cameraPosition.value = this.camera.position.clone()
+		this.material.uniforms.logDepthBufFC.value = 2.0 / (Math.log(this.camera.far + 1.0) / Math.LN2)
 	}
 }
