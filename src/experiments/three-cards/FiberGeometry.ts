@@ -8,8 +8,13 @@ export class FiberGeometry {
 	public positions: number[][] = []
 	public indices: number[][] = []
 	public uvs: number[][] = []
-	private width = 0.12
-	private length = 0.24
+
+	private size = 4.0
+
+	private fiberSize = 0.02
+	private fiberLength = 0.04
+	private curvature = 0.05
+	private density = 3
 
 	public segments = 4
 
@@ -29,11 +34,11 @@ export class FiberGeometry {
 	}
 
 	private makeOrigins() {
-		const minx = -2
-		const maxx = 2
-		const miny = -2
-		const maxy = 2
-		const step = 0.05
+		const minx = -this.size / 2
+		const maxx = this.size / 2
+		const miny = -this.size / 2
+		const maxy = this.size / 2
+		const step = this.fiberSize / this.density
 
 		const origins: OriginPoint[] = []
 		for (let x = minx; x < maxx; x += step) {
@@ -63,19 +68,36 @@ export class FiberGeometry {
 		const instanceMatrix = new THREE.InstancedBufferAttribute(matrixArray, 16, false, 1)
 		bufferGeometry.setAttribute('instanceMatrix', instanceMatrix)
 
+		const bendArray = new Float32Array(1 * this.count)
+		const bend = new THREE.InstancedBufferAttribute(bendArray, 1, false, 1)
+		bufferGeometry.setAttribute('bend', bend)
+
 		const matrix = new THREE.Matrix4()
 		for (let i = 0; i < this.count; i++) {
 			const x = origins[i][0]
 			const z = origins[i][1]
 			const theta = origins[i][2]
 			// prettier-ignore
-			matrix.set(
-				Math.cos(theta),   0,   Math.sin(theta),    -x,
-				0,            	   1,   0,                   0,
-				-Math.sin(theta),  0,   Math.cos(theta),    -z,
-				0,                 0,   0,                   1
-			)
+			// matrix.set(
+			// 	Math.cos(theta),   0,   Math.sin(theta),    -x,
+			// 	0,            	   1,   0,                   0,
+			// 	-Math.sin(theta),  0,   Math.cos(theta),    -z,
+			// 	0,                 0,   0,                   1
+			// )
+
+			const matrix = new THREE.Matrix4();
+
+			const angle = theta
+			matrix.makeRotationY(angle)
+
+			const translation = new THREE.Vector3(x, 0, z)
+			matrix.setPosition(translation)
+
+			const scale = new THREE.Vector3(Math.random() > 0.5 ? -1 : 1, 1 + Math.random() * 0.5, 1)
+			matrix.scale(scale)
+
 			matrix.toArray(matrixArray, i * 16)
+			bendArray[i] = (Math.random() - 0.5) * this.curvature
 		}
 
 		// TODO  check nan values
@@ -89,7 +111,7 @@ export class FiberGeometry {
 
 	private addlayer(segment: number) {
 		const start = this.positions.length
-		const y = (this.length / this.segments) * segment
+		const y = (this.fiberLength / this.segments) * segment
 		const v = segment / (this.segments - 1)
 		const width = this.getWidth(segment)
 		this.positions.push(
@@ -117,6 +139,6 @@ export class FiberGeometry {
 	}
 
 	private getWidth(segment: number) {
-		return this.width - ((segment / this.segments) * this.width) / 2
+		return this.fiberSize - ((segment / this.segments) * this.fiberSize) / 2
 	}
 }

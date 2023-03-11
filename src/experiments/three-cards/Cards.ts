@@ -28,12 +28,12 @@ export class Cards implements IRenderer {
 
 		// box for reference
 		const box = new THREE.Mesh(
-			new THREE.BoxGeometry(4.0, 0.1, 4.0),
+			new THREE.BoxGeometry(4.0, 0.02, 4.0),
 			new THREE.MeshStandardMaterial({
 				color: 0x111111,
 			})
 		)
-		box.position.y = -0.15
+		box.position.y = -0.01
 		this.renderer.scene.add(box)
 
 		this.animate()
