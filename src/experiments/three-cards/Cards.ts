@@ -2,6 +2,8 @@ import {IRenderer} from 'src/ui/data/RendererFactory'
 import * as THREE from 'three'
 import {Instanced} from 'src/experiments/three-cards/Instanced'
 import {Renderer} from 'src/three/Renderer'
+import {TextureLoader} from 'three'
+import {ThreeLightsLightScheme} from 'src/Renderer/ThreeLightLightSceme'
 
 export class Cards implements IRenderer {
 	animationId: number = -1
@@ -19,6 +21,7 @@ export class Cards implements IRenderer {
 		document.body.appendChild(div)
 
 		this.renderer = new Renderer(div)
+		new ThreeLightsLightScheme(this.renderer)
 
 		this.instanced = new Instanced(this.renderer)
 		const mesh = this.instanced.build()
@@ -26,15 +29,16 @@ export class Cards implements IRenderer {
 		const ah = new THREE.AxesHelper()
 		this.renderer.scene.add(ah)
 
-		// box for reference
-		const box = new THREE.Mesh(
-			new THREE.BoxGeometry(4.0, 0.02, 4.0),
-			new THREE.MeshStandardMaterial({
-				color: 0x111111,
+		// plane for reference
+		const plane = new THREE.Mesh(
+			new THREE.PlaneGeometry(4.0, 4.0),
+			new THREE.MeshBasicMaterial({
+				map: new TextureLoader().load('FurLeopard.jpg'),
 			})
 		)
-		box.position.y = -0.01
-		this.renderer.scene.add(box)
+		plane.rotateX(Math.PI / 2)
+		plane.scale.z = -1
+		this.renderer.scene.add(plane)
 
 		this.animate()
 

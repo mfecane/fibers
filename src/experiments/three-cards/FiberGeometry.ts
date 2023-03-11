@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import {BufferGeometry} from 'three'
 
-export type OriginPoint = [x: number, y: number, angle: number]
+export type OriginPoint = [x: number, y: number, angle: number, u: number, v: number]
 
 export class FiberGeometry {
 	private count = 0
@@ -9,12 +9,12 @@ export class FiberGeometry {
 	public indices: number[][] = []
 	public uvs: number[][] = []
 
-	private size = 4.0
+	private size = 3.95
 
-	private fiberSize = 0.02
+	private fiberSize = 0.1
 	private fiberLength = 0.04
 	private curvature = 0.05
-	private density = 3
+	private density = 8
 
 	public segments = 4
 
@@ -47,6 +47,8 @@ export class FiberGeometry {
 					x + (Math.random() - 0.5) * step,
 					y + (Math.random() - 0.5) * step,
 					Math.random() * Math.PI * 2,
+					(x - minx) / (maxx - minx),
+					(y - miny) / (maxy - miny),
 				])
 			}
 		}
@@ -72,11 +74,18 @@ export class FiberGeometry {
 		const bend = new THREE.InstancedBufferAttribute(bendArray, 1, false, 1)
 		bufferGeometry.setAttribute('bend', bend)
 
+		const uvArray = new Float32Array(2 * this.count)
+		const uv2 = new THREE.InstancedBufferAttribute(uvArray, 2, false, 1)
+		bufferGeometry.setAttribute('texCoords2', uv2)
+
 		const matrix = new THREE.Matrix4()
 		for (let i = 0; i < this.count; i++) {
 			const x = origins[i][0]
 			const z = origins[i][1]
 			const theta = origins[i][2]
+			const u = origins[i][3]
+			const v = origins[i][4]
+
 			// prettier-ignore
 			// matrix.set(
 			// 	Math.cos(theta),   0,   Math.sin(theta),    -x,
@@ -98,6 +107,9 @@ export class FiberGeometry {
 
 			matrix.toArray(matrixArray, i * 16)
 			bendArray[i] = (Math.random() - 0.5) * this.curvature
+
+			uvArray[2 * i] = u
+			uvArray[2 * i + 1] = v
 		}
 
 		// TODO  check nan values

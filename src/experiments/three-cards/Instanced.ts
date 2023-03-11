@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import {fragmentShaderSource, vertexShaderSource} from 'src/shaders/instance'
 import {Renderer} from '../../three/Renderer'
-import {PerspectiveCamera, RawShaderMaterial} from 'three'
+import {PerspectiveCamera, RawShaderMaterial, TextureLoader} from 'three'
 import {FiberGeometry} from './FiberGeometry'
 
 export class Instanced {
@@ -17,8 +17,16 @@ export class Instanced {
 		const geometry = builder.build()
 
 		const [width, height] = this.getDimensions()
+
+		const textureLoader = new TextureLoader()
+		const texture = textureLoader.load('FurFinHeight.png')
+		texture.premultiplyAlpha = true
+		const texture2 = textureLoader.load('FurLeopard.jpg')
+
 		this.material = new THREE.RawShaderMaterial({
 			uniforms: {
+				textureMap: {value: texture},
+				textureMap2: {value: texture2},
 				resolution: {value: new THREE.Vector2(width, height)},
 				cameraWorldMatrix: {value: this.camera.matrixWorld.clone()},
 				cameraWorldMatrixInverse: {value: this.camera.matrixWorldInverse.clone()},
@@ -30,6 +38,7 @@ export class Instanced {
 			fragmentShader: fragmentShaderSource,
 			side: THREE.DoubleSide,
 			transparent: true,
+			alphaTest: 0.95,
 		})
 		const mesh = new THREE.Mesh(geometry, this.material)
 
