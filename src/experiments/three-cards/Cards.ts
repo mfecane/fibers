@@ -33,7 +33,7 @@ export class Cards implements IRenderer {
 		const plane = new THREE.Mesh(
 			new THREE.PlaneGeometry(4.0, 4.0),
 			new THREE.MeshBasicMaterial({
-				map: new TextureLoader().load('FurLeopard.jpg'),
+				map: new TextureLoader().load('texture_5.jpg'),
 			})
 		)
 		plane.rotateX(Math.PI / 2)

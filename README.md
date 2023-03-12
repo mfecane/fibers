@@ -18,6 +18,24 @@ Once the loop has terminated, the accumulated density value is used to compute t
 
 Overall, ray marching with density functions allows for flexible and expressive rendering of complex volumetric objects, such as clouds, smoke, and other natural phenomena, as well as artistic and stylized effects. However, it can be computationally intensive and requires careful tuning of parameters to achieve good performance and visual quality.
 
+## Texture quality from chatGPT
+
+To improve the texture rendering quality with Three.js, you can try the following techniques:
+
+Increase the resolution of your textures: Use higher resolution images for your textures. This will help to reduce pixelation and improve the sharpness of your textures.
+
+Use mipmapping: Mipmapping is a technique used to reduce texture aliasing and improve performance. With mipmapping, multiple versions of the same texture are created at different resolutions, and the appropriate version is used depending on the distance between the camera and the texture.
+
+Use anisotropic filtering: Anisotropic filtering is a technique that helps to improve the clarity and sharpness of textures when they are viewed at oblique angles. By enabling anisotropic filtering, you can improve the quality of textures on surfaces that are not perpendicular to the camera.
+
+Use UV mapping: Proper UV mapping can significantly improve the quality of texture rendering. Make sure your UV coordinates are correctly aligned with your texture image to avoid distortion.
+
+Use shader-based texture filtering: By using custom shaders, you can implement advanced texture filtering techniques such as bilinear or trilinear filtering, which can improve the quality of texture rendering.
+
+Use physically-based rendering: Physically-based rendering is a technique that simulates how light interacts with materials in the real world. By using physically-based rendering, you can achieve more realistic and accurate textures.
+
+Use high-quality lighting: The quality of lighting in your scene can have a significant impact on the quality of texture rendering. Make sure to use high-quality lighting techniques such as global illumination, ambient occlusion, and shadow mapping to improve the overall visual quality of your scene.
+
 # Shader
 
 vertex shader projection

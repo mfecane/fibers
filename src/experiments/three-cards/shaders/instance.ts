@@ -19,7 +19,7 @@ out vec4 vPosition;
 
 void main()	{
   uv = texCoords;
-  uv2 = texCoords2;
+  uv2 = texCoords2; 
   vec3 pos = vec3(position, 0.0);
   pos.x += bend * uv.y * uv.y;
   pos.z += bend * uv.y * uv.y * 2.0;
@@ -36,6 +36,7 @@ precision mediump float;
 
 uniform sampler2D textureMap;
 uniform sampler2D textureMap2;
+uniform sampler2D textureMap3;
 uniform vec3 cameraPosition;
 uniform mat4 cameraWorldMatrixInverse;
 uniform mat4 cameraProjectionMatrix;
@@ -54,7 +55,9 @@ void main()	{
   if (c.w < 0.5) {
     discard;
   }
-  vec4 c2 = texture(textureMap2, uv2);
+  vec4 c2 = texture(textureMap2, uv2 + vec2(0.0, uv.x - 0.5) * 0.01);
+  c2 *= (0.4 + uv.y * 0.8);
+  c2 *= 0.5 + 0.5 * texture(textureMap3, uv);
   FragColor = vec4(c2.xyz, c.x);
 
   // vec4 clipPos = cameraProjectionMatrix * cameraWorldMatrixInverse * vPosition;

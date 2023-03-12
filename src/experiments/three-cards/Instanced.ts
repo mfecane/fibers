@@ -7,26 +7,31 @@ import {FiberGeometry} from './FiberGeometry'
 export class Instanced {
 	private material: RawShaderMaterial = new RawShaderMaterial()
 	private camera: PerspectiveCamera
+	private builder?: FiberGeometry
 
 	public constructor(private readonly renderer: Renderer) {
 		this.camera = renderer.camera
 	}
 
 	public build() {
-		const builder = new FiberGeometry()
-		const geometry = builder.build()
+		this.builder = new FiberGeometry(this.camera)
+		const geometry = this.builder.build()
 
 		const [width, height] = this.getDimensions()
 
 		const textureLoader = new TextureLoader()
-		const texture = textureLoader.load('FurFin.png')
+		const texture = textureLoader.load('fibers.png')
 		texture.premultiplyAlpha = true
-		const texture2 = textureLoader.load('FurLeopard.jpg')
+		texture.magFilter = THREE.LinearFilter
+		texture.minFilter = THREE.LinearFilter
+		const texture2 = textureLoader.load('texture_5.jpg')
+		const texture3 = textureLoader.load('fibers2.png')
 
 		this.material = new THREE.RawShaderMaterial({
 			uniforms: {
 				textureMap: {value: texture},
 				textureMap2: {value: texture2},
+				textureMap3: {value: texture3},
 				resolution: {value: new THREE.Vector2(width, height)},
 				cameraWorldMatrix: {value: this.camera.matrixWorld.clone()},
 				cameraWorldMatrixInverse: {value: this.camera.matrixWorldInverse.clone()},
@@ -59,6 +64,8 @@ export class Instanced {
 	}
 
 	public update() {
+		this.builder!.update()
+
 		this.material.uniforms.cameraWorldMatrix.value = this.camera.matrixWorld.clone()
 		this.material.uniforms.cameraWorldMatrixInverse.value = this.camera.matrixWorldInverse.clone()
 		this.material.uniforms.cameraProjectionMatrix.value = this.camera.projectionMatrix.clone()
